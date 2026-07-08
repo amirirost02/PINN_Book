@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شبکه‌های عصبی آگاه از فیزیک در مهندسی مکانیک</title>
+
+    <!-- لینک به فونت‌ها -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+    <!-- لینک به استایل مشترک -->
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* استایل اختصاصی برای صفحه فهرست */
+        .index-page {
+            max-width: 850px;
+            width: 100%;
+            background: #ffffff;
+            padding: 0;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            border-radius: 6px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        /* ---------- صفحه جلد ---------- */
+        .cover-page {
+            text-align: center;
+            padding: 60px 50px 50px 50px;
+            border-bottom: 2px solid #e2edf0;
+            background: #ffffff;
+        }
+
+        .cover-image {
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto 30px auto;
+            border: 1px solid #e2edf0;
+            border-radius: 4px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        .cover-title {
+            font-size: 34px;
+            font-weight: 700;
+            color: #0a192f;
+            margin-bottom: 10px;
+            letter-spacing: 0.02em;
+            line-height: 1.4;
+        }
+
+        .cover-subtitle {
+            font-size: 18px;
+            color: #4a5a6a;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        .cover-authors {
+            font-size: 20px;
+            color: #0a192f;
+            margin-bottom: 5px;
+        }
+
+        .cover-authors strong {
+            font-weight: 700;
+        }
+
+        .cover-affiliation {
+            font-size: 15px;
+            color: #6a7a8a;
+            margin-top: 8px;
+        }
+
+        .cover-year {
+            font-size: 15px;
+            color: #6a7a8a;
+            margin-top: 4px;
+        }
+
+        /* ---------- فهرست مطالب ---------- */
+        .toc-section {
+            padding: 30px 50px 50px 50px;
+            background: #fafbfc;
+        }
+
+        .toc-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0a192f;
+            border-bottom: 2px solid #2c7a7b;
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .chapter-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .chapter-list li {
+            border-bottom: 1px solid #e2edf0;
+            padding: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .chapter-list li:hover {
+            background: #f0f5f5;
+            padding-right: 8px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .chapter-list a {
+            color: #0a192f;
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .chapter-list a:hover {
+            color: #2c7a7b;
+        }
+
+        .chapter-list .chapter-title-text {
+            flex: 1;
+        }
+
+        .chapter-list .page-num {
+            color: #6a7a8a;
+            font-size: 14px;
+            font-family: 'Noto Serif', 'Times New Roman', serif;
+            font-weight: 400;
+            margin-right: 20px;
+            white-space: nowrap;
+        }
+
+        .chapter-list .preface-badge {
+            background: #e2edf0;
+            color: #0a192f;
+            font-size: 12px;
+            padding: 2px 12px;
+            border-radius: 12px;
+            margin-right: 12px;
+            font-weight: 400;
+        }
+
+        .index-footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #6a7a8a;
+            border-top: 1px solid #e2edf0;
+            padding-top: 20px;
+            font-size: 14px;
+        }
+
+        /* ---------- واکنش‌گرایی ---------- */
+        @media (max-width: 650px) {
+            .cover-page {
+                padding: 30px 20px 25px 20px;
+            }
+            .cover-title {
+                font-size: 24px;
+            }
+            .cover-subtitle {
+                font-size: 15px;
+            }
+            .toc-section {
+                padding: 20px 20px 30px 20px;
+            }
+            .chapter-list a {
+                font-size: 15px;
+                flex-wrap: wrap;
+            }
+            .chapter-list .page-num {
+                margin-right: 10px;
+                font-size: 13px;
+            }
+            .chapter-list .preface-badge {
+                font-size: 10px;
+                padding: 1px 8px;
+            }
+        }
+
+        /* ---------- چاپ ---------- */
+        @media print {
+            .cover-page {
+                page-break-after: always;
+            }
+            .chapter-list li:hover {
+                background: transparent;
+                padding-right: 0;
+            }
+            .index-page {
+                box-shadow: none;
+                border: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="index-page">
+
+        <!-- ========================================================== -->
+        <!-- صفحه جلد (Cover Page) -->
+        <!-- ========================================================== -->
+        <div class="cover-page">
+
+            <
+            <img src="cover.png" alt="طرح جلد کتاب" class="cover-image">
+            >
+
+            <div class="cover-title">شبکه‌های عصبی آگاه از فیزیک</div>
+            <div class="cover-title" style="font-size:28px; margin-top:-8px;">در مهندسی مکانیک</div>
+
+            <div class="cover-subtitle">از مفاهیم پایه تا کاربردهای پیشرفته در ارتعاشات و کنترل</div>
+
+            <div class="cover-authors">
+                <strong>امیر فصیح</strong> — <strong>داوود یونسیان</strong>
+            </div>
+
+            <div class="cover-affiliation">دانشگاه علم و صنعت ایران</div>
+            <div class="cover-year">۱۴۰۴</div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- فهرست مطالب -->
+        <!-- ========================================================== -->
+        <div class="toc-section">
+
+            <div class="toc-title">📚 فهرست مطالب</div>
+
+            <ul class="chapter-list">
+
+                <!-- پیشگفتار -->
+                <li>
+                    <a href="preface.html">
+                        <span class="chapter-title-text">
+                            <span class="preface-badge">پیشگفتار</span>
+                            شبکه‌های عصبی آگاه از فیزیک در مهندسی مکانیک
+                        </span>
+                        <span class="page-num">i</span>
+                    </a>
+                </li>
+
+                <!-- فصل ۱ -->
+                <li>
+                    <a href="chapter1.html">
+                        <span class="chapter-title-text">فصل ۱: <span class="lr">PINN</span> چیست و چه نیازی به آن داریم؟</span>
+                        <span class="page-num">۱</span>
+                    </a>
+                </li>
+
+                <!-- فصل ۲ -->
+                <li>
+                    <a href="chapter2.html">
+                        <span class="chapter-title-text">فصل ۲: شبکه‌های عصبی و چالش‌های آن‌ها در حل مسائل مهندسی</span>
+                        <span class="page-num">۲۵</span>
+                    </a>
+                </li>
+
+                <!-- فصل ۳ -->
+                <li>
+                    <a href="chapter3.html">
+                        <span class="chapter-title-text">فصل ۳: ساختار دقیق <span class="lr">PINN</span> و ریاضیات تابع هزینه</span>
+                        <span class="page-num">۴۳</span>
+                    </a>
+                </li>
+
+                <!-- فصل ۴ -->
+                <li>
+                    <a href="chapter4.html">
+                        <span class="chapter-title-text">فصل ۴: اولین <span class="lr">PINN</span> در <span class="lr">PyTorch</span> — حل <span class="lr">ODE</span> مرتبه اول</span>
+                        <span class="page-num">۶۲</span>
+                    </a>
+                </li>
+
+                <!-- فصل ۵ -->
+                <li>
+                    <a href="chapter5.html">
+                        <span class="chapter-title-text">فصل ۵: ورود به <span class="lr">PDE</span> — حل معادله‌ی انتقال حرارت یک‌بعدی</span>
+                        <span class="page-num">۸۹</span>
+                    </a>
+                </li>
+
+                <!-- فصل ۶ -->
+                <li>
+                    <a href="chapter6.html">
+                        <span class="chapter-title-text">فصل ۶: مسئله‌ی معکوس — شناسایی ضریب مجهول</span>
+                        <span class="page-num">۱۱۰</span>
+                    </a>
+                </li>
+
+                <!-- فصل ۷ -->
+                <li>
+                    <a href="chapter7.html">
+                        <span class="chapter-title-text">فصل ۷: مسائل پارامتریک — حل خانواده‌ای از مسائل با یک بار آموزش</span>
+                        <span class="page-num">۱۳۰</span>
+                    </a>
+                </li>
+
+                <!-- فصل ۸ -->
+                <li>
+                    <a href="chapter8.html">
+                        <span class="chapter-title-text">فصل ۸: تحلیل مودال و مسائل مقدار ویژه با <span class="lr">PINN</span></span>
+                        <span class="page-num">۱۵۰</span>
+                    </a>
+                </li>
+
+                <!-- فصل ۹ -->
+                <li>
+                    <a href="chapter9.html">
+                        <span class="chapter-title-text">فصل ۹: تخمین حالت و سنسور مجازی با <span class="lr">PINN</span></span>
+                        <span class="page-num">۱۷۰</span>
+                    </a>
+                </li>
+
+                <!-- فصل ۱۰ -->
+                <li>
+                    <a href="chapter10.html">
+                        <span class="chapter-title-text">فصل ۱۰: جعبه‌ابزار عیب‌زدایی و پایدارسازی آموزش (<span class="lr">Survival Kit</span>)</span>
+                        <span class="page-num">۱۹۰</span>
+                    </a>
+                </li>
+
+                <!-- فصل ۱۱ -->
+                <li>
+                    <a href="chapter11.html">
+                        <span class="chapter-title-text">فصل ۱۱: چالش اول — اعمال دقیق شرایط مرزی (از روش جریمه تا قید سخت)</span>
+                        <span class="page-num">۲۱۰</span>
+                    </a>
+                </li>
+
+                <!-- فصل ۱۲ -->
+                <li>
+                    <a href="chapter12.html">
+                        <span class="chapter-title-text">فصل ۱۲: چالش دوم — انتخاب هوشمند نقاط کالوکیشن و معماری‌های مقاوم</span>
+                        <span class="page-num">۲۳۰</span>
+                    </a>
+                </li>
+
+                <!-- فصل ۱۳ -->
+                <li>
+                    <a href="chapter13.html">
+                        <span class="chapter-title-text">فصل ۱۳: چالش سوم — مسائل معکوس بدحالت، نویز، و پروژه نهایی</span>
+                        <span class="page-num">۲۵۰</span>
+                    </a>
+                </li>
+
+                <!-- فصل ۱۴ -->
+                <li>
+                    <a href="chapter14.html">
+                        <span class="chapter-title-text">فصل ۱۴: چشم‌انداز پیشرفته — <span class="lr">DeepONet</span>، <span class="lr">FNO</span>، و <span class="lr">B-PINN</span></span>
+                        <span class="page-num">۲۷۰</span>
+                    </a>
+                </li>
+
+            </ul>
+
+            <div class="index-footer">
+                برای مطالعه، روی عنوان هر فصل کلیک کنید.
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

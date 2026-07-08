@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فصل ۱۱: چالش اول — اعمال دقیق شرایط مرزی (از روش جریمه تا قید سخت)</title>
+
+    <!-- لینک به فونت‌ها -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+    <!-- لینک به استایل و اسکریپت مشترک -->
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+
+    <!-- MathJax برای فرمول‌ها -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ['$', '$'],
+                    ['\\(', '\\)']
+                ],
+                displayMath: [
+                    ['$$', '$$'],
+                    ['\\[', '\\]']
+                ],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+
+    <style>
+        .figure-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e2edf0;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .figure-caption {
+            font-size: 14px;
+            color: #4a5a6a;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        .figure-caption .lr {
+            font-weight: 600;
+        }
+
+        .lstlisting {
+            direction: ltr;
+            background: #1e2b3c;
+            color: #e2e8f0;
+            padding: 18px 22px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            position: relative;
+            padding-top: 50px;
+        }
+
+        .lstlisting .comment {
+            color: #7f9f7f;
+        }
+        .lstlisting .keyword {
+            color: #f7c948;
+        }
+        .lstlisting .func {
+            color: #7fc1f7;
+        }
+        .lstlisting .string {
+            color: #b5d99c;
+        }
+        .lstlisting .number {
+            color: #e8a87c;
+        }
+
+        .lstlisting .copy-btn {
+            float: left;
+            margin-top: -5px;
+            margin-bottom: 10px;
+            background: #2c7a7b;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .lstlisting .copy-btn:hover {
+            background: #1a5a5b;
+        }
+
+        table.compare-table td {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="book-page">
+
+        <!-- ========================================================== -->
+        <!-- سرصفحه -->
+        <!-- ========================================================== -->
+        <div class="header-line">
+            <span class="header-left">فصل ۱۱</span>
+            <span class="header-right">چالش اول — اعمال دقیق شرایط مرزی (از روش جریمه تا قید سخت)</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- فاصله‌ی ۱۰۰px از بالا -->
+        <!-- ========================================================== -->
+        <div class="chapter-spacer"></div>
+
+        <!-- ========================================================== -->
+        <!-- عنوان اصلی -->
+        <!-- ========================================================== -->
+        <h1>فصل ۱۱: چالش اول — اعمال دقیق شرایط مرزی (از روش جریمه تا قید سخت)</h1>
+
+        <!-- ========================================================== -->
+        <!-- جعبه اهداف -->
+        <!-- ========================================================== -->
+        <div class="pinnbox">
+            <strong>اهداف یادگیری</strong>
+            <p style="margin-top:6px;">پس از مطالعهٔ این فصل، شما قادر خواهید بود:</p>
+            <ol>
+                <li>محدودیت‌های روش جریمه (<span class="lr">Penalty Method</span>) را در اعمال شرایط مرزی توضیح دهید.</li>
+                <li>روش جریمهٔ تطبیقی (<span class="lr">Adaptive Penalty</span>) را برای بهبود همگرایی پیاده‌سازی کنید.</li>
+                <li>یک شرط مرزی را با استفاده از تابع فاصلهٔ علامت‌دار (<span class="lr">SDF</span>) به‌صورت سخت (<span class="lr">Hard Constraint</span>) اعمال کنید.</li>
+                <li>با استفاده از فرمول‌بندی جمعی، هم شرایط مرزی و هم شرط اولیه را به‌صورت سخت اعمال کنید.</li>
+                <li>دلیل استفاده از توان دوم زمان ($t^2$) در قید سخت شرایط اولیهٔ سرعت را به‌صورت ریاضی و شهودی تحلیل کنید.</li>
+                <li>روش مناسب اعمال شرایط مرزی را بر اساس نوع مسئله و هندسهٔ دامنه انتخاب کنید.</li>
+            </ol>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۱ -->
+        <!-- ========================================================== -->
+        <h2>روش جریمه: رویکردی ساده اما حساس</h2>
+
+        <p>در تمام فصول گذشته، برای اعمال شرایط مرزی و اولیه از <strong>روش جریمه (<span class="lr">Penalty Method</span>)</strong> استفاده کردیم:</p>
+
+        <div class="equation">
+            $$ \mathcal{L}_{total} = \mathcal{L}_{physics} + \lambda_{BC} \cdot \mathcal{L}_{BC} + \lambda_{IC} \cdot \mathcal{L}_{IC} $$
+        </div>
+
+        <p>روش جریمه سه محدودیت اساسی دارد:</p>
+
+        <h3>محدودیت حساسیت به وزن‌ها</h3>
+        <p>اگر وزن $\lambda_{BC}$ بسیار کوچک باشد، شبکه شرط مرزی را نادیده می‌گیرد. اگر بسیار بزرگ باشد، شبکه تمام توان خود را صرف کاهش $\mathcal{L}_{BC}$ می‌کند.</p>
+
+        <h3>محدودیت نمونه‌برداری از مرزها</h3>
+        <p>روش جریمه فقط در نقاط مرزی که در تابع هزینه گنجانده شده‌اند، شرط را اعمال می‌کند.</p>
+
+        <h3>محدودیت عدم تضمین فیزیکی</h3>
+        <p>روش جریمه یک روش «نرم» است. شبکه مجاز است شرط مرزی را تا حدودی نقض کند.</p>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۲ -->
+        <!-- ========================================================== -->
+        <h2>روش جریمه: یک مثال نقض‌شده</h2>
+
+        <p>برای درک محدودیت‌ها، مثال معادلهٔ لاپلاس یک‌بعدی با جواب تحلیلی $u(x) = x$ را بررسی کنید:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><strong>ضریب وزنی ($\lambda_{BC}$)</strong></th>
+                    <th><strong>خطای شرط مرزی</strong></th>
+                    <th><strong>خطای معادله</strong></th>
+                    <th><strong>نتیجه</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>۰.۰۱</td>
+                    <td>زیاد</td>
+                    <td>کم</td>
+                    <td>جواب نادرست</td>
+                </tr>
+                <tr>
+                    <td>۱.۰</td>
+                    <td>متوسط</td>
+                    <td>متوسط</td>
+                    <td>جواب قابل‌قبول</td>
+                </tr>
+                <tr>
+                    <td>۱۰۰.۰</td>
+                    <td>بسیار کم</td>
+                    <td>زیاد</td>
+                    <td>جواب صاف و بی‌مفهوم</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۱: مقایسه سه روش -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-11-pic-01.png" alt="مقایسه سه روش اعمال شرایط مرزی">
+            <div class="figure-caption">
+                شکل ۱۱-۱: مقایسهٔ سه روش اعمال شرایط مرزی — جواب تحلیلی (خط آبی ممتد)، جریمه (خط قرمز چین)، و قید سخت (خط سبز نقطه‌چین)
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۳ -->
+        <!-- ========================================================== -->
+        <h2>روش جریمهٔ تطبیقی (<span class="lr">Adaptive Penalty</span>)</h2>
+
+        <div class="equation">
+            $$ \lambda_{BC}^{(epoch)} = \lambda_{BC}^{initial} \cdot \left( 1 + \frac{epoch}{N_{\max}} \right) $$
+        </div>
+
+        <div class="lstlisting" style="padding-top:20px;">
+            lambda_bc_initial = <span class="number">1.0</span>
+            lambda_bc_max = <span class="number">100.0</span>
+            N_epochs = <span class="number">8000</span>
+
+            <span class="keyword">for</span> epoch <span class="keyword">in</span> range(N_epochs):
+                lambda_bc = lambda_bc_initial + (lambda_bc_max - lambda_bc_initial) * (epoch / N_epochs)
+                loss = loss_physics + lambda_bc * loss_bc
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۲: نمایش SDF -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-11-pic-02.png" alt="نمایش تابع فاصله علامت‌دار (SDF)">
+            <div class="figure-caption">
+                شکل ۱۱-۲: نمایش تابع فاصلهٔ علامت‌دار (<span class="lr">SDF</span>) برای دامنهٔ یک‌بعدی $x \in [0,1]$ — تابع در مرزها صفر و در داخل مثبت است
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۴ -->
+        <!-- ========================================================== -->
+        <h2>راه‌حل پیشرفته: اعمال سخت شرایط مرزی با <span class="lr">SDF</span></h2>
+
+        <p><strong>ایدهٔ اصلی:</strong> به‌جای جریمه کردن خطا در مرزها، شرط مرزی را در ساختار شبکه گنجانده می‌کنیم.</p>
+
+        <p><strong>روش <span class="lr">SDF</span> (<span class="lr">Signed Distance Function</span>):</strong></p>
+        <div class="equation">
+            $$ u_{NN}(x,t) = SDF(x,t) \cdot \mathcal{N}(x,t) + g(x,t) $$
+        </div>
+
+        <h3><span class="lr">SDF</span> برای دامنه‌های ساده</h3>
+
+        <p><strong>دامنهٔ یک‌بعدی $x \in [0, L]$:</strong> $SDF(x) = x(L - x)$</p>
+
+        <p><strong>دامنهٔ مستطیلی:</strong> $SDF(x,y) = x(L_x - x) \cdot y(L_y - y)$</p>
+
+        <p><strong>شرایط مرزی غیرصفر:</strong> $g(x,t) = a + (b - a)\frac{x}{L}$</p>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۵ -->
+        <!-- ========================================================== -->
+        <h2>ترکیب قیدهای سخت برای شرایط مرزی و اولیه (فرمول‌بندی جمعی)</h2>
+
+        <div class="equation">
+            $$ u_{NN}(x,t) = g(x,t) + SDF(x) \cdot h(t) \cdot \mathcal{N}(x,t) $$
+        </div>
+
+        <p><strong>مثال: انتقال حرارت با $T(0,t) = 0$، $T(1,t) = 0$، و $T(x,0) = \sin(\pi x)$:</strong></p>
+        <ul>
+            <li>$g(x,t) = \sin(\pi x)$ (شرط اولیه را برآورده می‌کند)</li>
+            <li>$SDF(x) = x(1 - x)$ (در مرزهای مکانی صفر است)</li>
+            <li>$h(t) = t$ (در $t=0$ صفر است)</li>
+        </ul>
+
+        <p><strong>خروجی نهایی:</strong></p>
+        <div class="equation">
+            $$ T_{NN}(x,t) = \sin(\pi x) + t \cdot x(1 - x) \cdot \mathcal{N}(x,t) $$
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۶ -->
+        <!-- ========================================================== -->
+        <h2>فلسفهٔ ریاضی و شهودی $t^2$ در قید سخت شرایط اولیهٔ سرعت</h2>
+
+        <p>اگر مسئله شامل شرط اولیهٔ سرعت باشد ($\dot{x}(0) = v_0$):</p>
+        <div class="equation">
+            $$ x_{NN}(t) = x_0 + v_0 \cdot t + t^2 \cdot \mathcal{N}(t) $$
+        </div>
+
+        <ul>
+            <li>در $t = 0$: $x_{NN}(0) = x_0$ ✓</li>
+            <li>مشتق: $\dot{x}_{NN}(t) = v_0 + 2t \cdot \mathcal{N}(t) + t^2 \cdot \dot{\mathcal{N}}(t)$</li>
+            <li>در $t = 0$: $\dot{x}_{NN}(0) = v_0$ ✓</li>
+        </ul>
+
+        <p><strong>چرا $t$ کافی نیست؟</strong> با $x_{NN}(t) = x_0 + v_0 \cdot t + t \cdot \mathcal{N}(t)$، شرط سرعت به $v_0 + \mathcal{N}(0)$ تبدیل می‌شود که تنها با $\mathcal{N}(0) = 0$ برقرار است.</p>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۳: مقایسه L2 Error -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-11-pic-03.png" alt="مقایسه L2 Error سه روش">
+            <div class="figure-caption">
+                شکل ۱۱-۳: مقایسهٔ خطای L2 در سه روش اعمال شرایط مرزی — قید سخت عملکرد بهتری دارد
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۷ -->
+        <!-- ========================================================== -->
+        <h2>کد کامل <span class="lr">PINN</span> با قید سخت (<span class="lr">SDF</span> + فرمول‌بندی جمعی)</h2>
+
+        <div class="lstlisting">
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۱: تعریف شبکه با قید سخت کامل</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            <span class="keyword">import</span> torch
+            <span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn
+            <span class="keyword">import</span> numpy <span class="keyword">as</span> np
+            <span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt
+
+            torch.set_default_dtype(torch.float64)
+
+            <span class="keyword">class</span> <span class="func">PINN_HardConstraint</span>(nn.Module):
+                <span class="keyword">def</span> <span class="func">__init__</span>(self, layers=[2, 50, 50, 50, 50, 1]):
+                    <span class="keyword">super</span>(PINN_HardConstraint, self).__init__()
+                    self.net = nn.Sequential()
+                    <span class="keyword">for</span> i <span class="keyword">in</span> range(len(layers) - 1):
+                        self.net.add_module(<span class="string">f'linear_{i}'</span>, nn.Linear(layers[i], layers[i+1]))
+                        <span class="keyword">if</span> i < len(layers) - 2:
+                            self.net.add_module(<span class="string">f'tanh_{i}'</span>, nn.Tanh())
+
+                <span class="keyword">def</span> <span class="func">forward</span>(self, x, t):
+                    g = torch.sin(np.pi * x)
+                    sdf = x * (1 - x)
+                    h = t
+                    u = self.net(torch.cat([x, t], dim=1))
+                    <span class="keyword">return</span> g + sdf * h * u
+
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۲: تولید نقاط کالوکیشن (فقط نقاط داخلی)</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            L, T = <span class="number">1.0</span>, <span class="number">1.0</span>
+            alpha = <span class="number">0.01</span>
+            N_col = <span class="number">5000</span>
+
+            x_col = torch.rand(N_col, <span class="number">1</span>, requires_grad=True) * L
+            t_col = torch.rand(N_col, <span class="number">1</span>, requires_grad=True) * T
+
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۳: تابع هزینه (فقط L_physics)</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            model = PINN_HardConstraint()
+            optimizer = torch.optim.Adam(model.parameters(), lr=<span class="number">1e-3</span>)
+
+            <span class="keyword">def</span> <span class="func">compute_loss</span>():
+                T_pred = model(x_col, t_col)
+
+                T_t = torch.autograd.grad(T_pred, t_col, grad_outputs=torch.ones_like(T_pred),
+                                          create_graph=True, retain_graph=True)[0]
+                T_x = torch.autograd.grad(T_pred, x_col, grad_outputs=torch.ones_like(T_pred),
+                                          create_graph=True, retain_graph=True)[0]
+                T_xx = torch.autograd.grad(T_x, x_col, grad_outputs=torch.ones_like(T_x),
+                                           create_graph=True, retain_graph=True)[0]
+
+                residual = T_t - alpha * T_xx
+                loss_physics = torch.mean(residual**2)
+                <span class="keyword">return</span> loss_physics
+
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۴: حلقه‌ی آموزش</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            loss_history = []
+            n_epochs_adam = <span class="number">8000</span>
+
+            <span class="keyword">for</span> epoch <span class="keyword">in</span> range(n_epochs_adam):
+                optimizer.zero_grad()
+                loss = compute_loss()
+                loss.backward()
+                optimizer.step()
+                loss_history.append(loss.item())
+                <span class="keyword">if</span> (epoch+<span class="number">1</span>) % <span class="number">2000</span> == <span class="number">0</span>:
+                    <span class="func">print</span>(<span class="string">f'Epoch {epoch+1}, Loss: {loss.item():.2e}'</span>)
+
+            optimizer_lbfgs = torch.optim.LBFGS(model.parameters(), lr=<span class="number">1.0</span>, max_iter=<span class="number">500</span>)
+            <span class="keyword">def</span> <span class="func">closure</span>():
+                optimizer_lbfgs.zero_grad()
+                loss = compute_loss()
+                loss.backward()
+                <span class="keyword">return</span> loss
+            optimizer_lbfgs.step(closure)
+
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۵: ارزیابی</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            x_test = torch.linspace(<span class="number">0</span>, L, <span class="number">100</span>).reshape(-<span class="number">1</span>, <span class="number">1</span>)
+            t_test = torch.linspace(<span class="number">0</span>, T, <span class="number">100</span>).reshape(-<span class="number">1</span>, <span class="number">1</span>)
+            X, T_grid = torch.meshgrid(x_test.squeeze(), t_test.squeeze(), indexing='ij')
+            x_flat = X.reshape(-<span class="number">1</span>, <span class="number">1</span>)
+            t_flat = T_grid.reshape(-<span class="number">1</span>, <span class="number">1</span>)
+
+            <span class="keyword">with</span> torch.no_grad():
+                T_pred_flat = model(x_flat, t_flat).numpy()
+                T_pred = T_pred_flat.reshape(X.shape)
+
+            T_exact = np.sin(np.pi * X.numpy()) * np.exp(-alpha * np.pi**2 * T_grid.numpy())
+
+            error_l2 = np.linalg.norm(T_pred - T_exact) / np.linalg.norm(T_exact)
+            <span class="func">print</span>(<span class="string">f'L2 Error: {error_l2:.2e}'</span>)
+
+            fig, axes = plt.subplots(<span class="number">1</span>, <span class="number">2</span>, figsize=(<span class="number">12</span>, <span class="number">5</span>))
+            im1 = axes[<span class="number">0</span>].contourf(T_grid, X, T_exact, levels=<span class="number">50</span>, cmap='hot')
+            axes[<span class="number">0</span>].set_title(<span class="string">'Analytical'</span>)
+            plt.colorbar(im1, ax=axes[<span class="number">0</span>])
+            im2 = axes[<span class="number">1</span>].contourf(T_grid, X, T_pred, levels=<span class="number">50</span>, cmap='hot')
+            axes[<span class="number">1</span>].set_title(<span class="string">'PINN (Hard Constraint)'</span>)
+            plt.colorbar(im2, ax=axes[<span class="number">1</span>])
+            plt.tight_layout()
+            plt.show()
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۸ -->
+        <!-- ========================================================== -->
+        <h2>مقایسهٔ سه روش</h2>
+
+        <table class="compare-table">
+            <thead>
+                <tr>
+                    <th><strong>معیار</strong></th>
+                    <th><strong>جریمه ثابت</strong></th>
+                    <th><strong>جریمه تطبیقی</strong></th>
+                    <th><strong><span class="lr">SDF</span> (قید سخت)</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>نیاز به تنظیم وزن</td>
+                    <td>بله (بسیار حساس)</td>
+                    <td>کمتر</td>
+                    <td>خیر</td>
+                </tr>
+                <tr>
+                    <td>تضمین شرط مرزی</td>
+                    <td>تقریبی</td>
+                    <td>تقریبی</td>
+                    <td>دقیق (تضمین‌شده)</td>
+                </tr>
+                <tr>
+                    <td>تعداد ترم‌های تابع هزینه</td>
+                    <td>زیاد</td>
+                    <td>زیاد</td>
+                    <td>کم (فقط $\mathcal{L}_{physics}$)</td>
+                </tr>
+                <tr>
+                    <td>سرعت همگرایی</td>
+                    <td>کند</td>
+                    <td>متوسط</td>
+                    <td>سریع</td>
+                </tr>
+                <tr>
+                    <td>مناسب برای هندسه‌های پیچیده</td>
+                    <td>بله</td>
+                    <td>بله</td>
+                    <td>خیر</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ========================================================== -->
+        <!-- جمع‌بندی -->
+        <!-- ========================================================== -->
+        <h2>جمع‌بندی و مسیر پیش‌رو</h2>
+
+        <p>در این فصل، با سه رویکرد برای اعمال شرایط مرزی آشنا شدیم. نکات کلیدی:</p>
+
+        <ol>
+            <li><strong>روش جریمه ثابت</strong> ساده است اما به تنظیم وزن حساس است.</li>
+            <li><strong>روش جریمه تطبیقی</strong> با افزایش تدریجی وزن، نیاز به تنظیم دستی را کاهش می‌دهد.</li>
+            <li><strong>روش <span class="lr">SDF</span> (قید سخت)</strong> با گنجاندن شرط مرزی در ساختار شبکه، آن را تضمین می‌کند.</li>
+            <li>استفاده از $t^2$ به‌جای $t$ برای اعمال سخت شرط اولیهٔ سرعت ضروری است.</li>
+        </ol>
+
+        <p><strong>پل به فصل دوازدهم:</strong> در فصل بعد، با چالش انتخاب نقاط کالوکیشن و معماری شبکه (<span class="lr">RAR</span> و <span class="lr">SIREN</span>) آشنا خواهید شد.</p>
+
+        <!-- ========================================================== -->
+        <!-- تمرین‌های عملی -->
+        <!-- ========================================================== -->
+        <h2 style="margin-top:40px;">تمرین‌های عملی</h2>
+
+        <ol>
+            <li>
+                <strong>تمرین ۱ (مقایسهٔ روش‌ها):</strong> مسئلهٔ لاپلاس یک‌بعدی را با سه روش حل کنید.
+            </li>
+            <li>
+                <strong>تمرین ۲ (قید سخت برای شرایط مرزی غیرصفر):</strong> شرایط مرزی $T(0,t) = 5$ و $T(1,t) = 0$ را اعمال کنید.
+            </li>
+            <li>
+                <strong>تمرین ۳ (استفاده از $t^2$):</strong> مسئلهٔ فنر-جرم-دمپر را با قید سخت $t^2$ حل کنید.
+            </li>
+        </ol>
+
+        <!-- ========================================================== -->
+        <!-- مرجع تکمیلی -->
+        <!-- ========================================================== -->
+        <div class="reference">
+            <strong>مرجع تکمیلی</strong><br>
+            <span class="lr">Sukumar &amp; Srivastava (2022). "Enforcing boundary conditions in physics-informed neural networks."</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- پانویس -->
+        <!-- ========================================================== -->
+        <div class="footer-line">
+            — ۲۱۰ —
+        </div>
+
+    </div>
+
+</body>
+</html>

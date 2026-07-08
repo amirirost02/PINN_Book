@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فصل ۱۰: جعبه‌ابزار عیب‌زدایی و پایدارسازی آموزش (Survival Kit)</title>
+
+    <!-- لینک به فونت‌ها -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+    <!-- لینک به استایل و اسکریپت مشترک -->
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+
+    <!-- MathJax برای فرمول‌ها -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ['$', '$'],
+                    ['\\(', '\\)']
+                ],
+                displayMath: [
+                    ['$$', '$$'],
+                    ['\\[', '\\]']
+                ],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+
+    <style>
+        .figure-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e2edf0;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .figure-caption {
+            font-size: 14px;
+            color: #4a5a6a;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        .figure-caption .lr {
+            font-weight: 600;
+        }
+
+        .lstlisting {
+            direction: ltr;
+            background: #1e2b3c;
+            color: #e2e8f0;
+            padding: 18px 22px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            position: relative;
+            padding-top: 50px;
+        }
+
+        .lstlisting .comment {
+            color: #7f9f7f;
+        }
+        .lstlisting .keyword {
+            color: #f7c948;
+        }
+        .lstlisting .func {
+            color: #7fc1f7;
+        }
+        .lstlisting .string {
+            color: #b5d99c;
+        }
+        .lstlisting .number {
+            color: #e8a87c;
+        }
+
+        .lstlisting .copy-btn {
+            float: left;
+            margin-top: -5px;
+            margin-bottom: 10px;
+            background: #2c7a7b;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .lstlisting .copy-btn:hover {
+            background: #1a5a5b;
+        }
+
+        table.checklist td {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="book-page">
+
+        <!-- ========================================================== -->
+        <!-- سرصفحه -->
+        <!-- ========================================================== -->
+        <div class="header-line">
+            <span class="header-left">فصل ۱۰</span>
+            <span class="header-right">جعبه‌ابزار عیب‌زدایی و پایدارسازی آموزش (<span class="lr">Survival Kit</span>)</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- فاصله‌ی ۱۰۰px از بالا -->
+        <!-- ========================================================== -->
+        <div class="chapter-spacer"></div>
+
+        <!-- ========================================================== -->
+        <!-- عنوان اصلی -->
+        <!-- ========================================================== -->
+        <h1>فصل ۱۰: جعبه‌ابزار عیب‌زدایی و پایدارسازی آموزش (<span class="lr">Survival Kit</span>)</h1>
+
+        <!-- ========================================================== -->
+        <!-- جعبه اهداف -->
+        <!-- ========================================================== -->
+        <div class="pinnbox">
+            <strong>اهداف یادگیری</strong>
+            <p style="margin-top:6px;">پس از مطالعهٔ این فصل، شما قادر خواهید بود:</p>
+            <ol>
+                <li>چهار ترفند اصلی پایدارسازی آموزش <span class="lr">PINN</span> را به‌کار بگیرید.</li>
+                <li>علت واگرایی یا عدم همگرایی شبکه را بر اساس علائم تشخیص دهید.</li>
+                <li>یک چک‌لیست عیب‌زدایی گام‌به‌گام برای پروژه‌های خود تهیه کنید.</li>
+                <li>تأثیر دقت عددی، نرمال‌سازی، وزن‌دهی پویا، و آموزش علّی را بر عملکرد <span class="lr">PINN</span> تحلیل کنید.</li>
+                <li>یک کد <span class="lr">PINN</span> واگرا را با اعمال ترفندهای این فصل به همگرایی برسانید.</li>
+            </ol>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۱ -->
+        <!-- ========================================================== -->
+        <h2>چرا <span class="lr">PINN</span> همیشه به‌راحتی آموزش نمی‌بیند؟</h2>
+
+        <p>در فصول گذشته، با موفقیت <span class="lr">PINN</span> را برای مسائل مختلف (<span class="lr">ODE</span>، <span class="lr">PDE</span>، معکوس، پارامتریک، تحلیل مودال، و تخمین حالت) پیاده‌سازی کردیم. اما در دنیای واقعی — به‌ویژه با داده‌های نویزی، سیستم‌های با میرایی کم، یا معادلات سخت (<span class="lr">Stiff</span>) — آموزش <span class="lr">PINN</span> اغلب با چالش‌هایی روبه‌رو می‌شود:</p>
+
+        <ul>
+            <li><strong>واگرایی (<span class="lr">Divergence</span>):</strong> تابع هزینه به‌جای کاهش، افزایش می‌یابد یا به <span class="lr">NaN</span> تبدیل می‌شود.</li>
+            <li><strong>قفل شدن در فلات (<span class="lr">Flat Plateau</span>):</strong> تلفات پس از چند <span class="lr">Epoch</span> کاهش نمی‌یابد.</li>
+            <li><strong>جواب‌های غیرفیزیکی:</strong> تلفات پایین است، اما خروجی شبکه با قوانین فیزیک سازگار نیست.</li>
+            <li><strong>حساسیت به مقدار اولیه:</strong> با هر بار اجرا، نتایج متفاوتی به‌دست می‌آید.</li>
+        </ul>
+
+        <p><strong>علت ریشه‌ای:</strong> <span class="lr">PINN</span> یک مسئلهٔ بهینه‌سازی غیرخطی و غیرمحدب را حل می‌کند. کوچک‌ترین بی‌تناسبی در مقیاس‌ها یا انتخاب نادرست پارامترها، می‌تواند کل فرآیند آموزش را مختل کند.</p>
+
+        <p>این فصل، <strong>جعبه‌ابزار نجات (<span class="lr">Survival Kit</span>)</strong> شماست. چهار ترفند حیاتی را یاد می‌گیرید که در ۹۰\% موارد، مشکل واگرایی یا عدم همگرایی <span class="lr">PINN</span> را حل می‌کنند.</p>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۱: مقایسه float32 و float64 -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-10-pic-01.png" alt="مقایسه رفتار تلفات در float32 و float64">
+            <div class="figure-caption">
+                شکل ۱۰-۱: مقایسهٔ رفتار تلفات در دقت <span class="lr">float32</span> (خط چین قرمز — واگرایی) و <span class="lr">float64</span> (خط ممتد آبی — همگرایی)
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۲ -->
+        <!-- ========================================================== -->
+        <h2>ترفند اول: دقت عددی بالا (<span class="lr">float64</span>)</h2>
+
+        <h3>مشکل: ناپایداری عددی در <span class="lr">float32</span></h3>
+
+        <p><span class="lr">PyTorch</span> به‌صورت پیش‌فرض از دقت <span class="lr">float32</span> (عدد ممیز شناور با ۳۲ بیت) استفاده می‌کند. این دقت برای <span class="lr">PINN</span> که نیاز به محاسبهٔ مشتقات مرتبهٔ دوم (و گاهی مرتبهٔ چهارم) دارد، اغلب <strong>ناکافی</strong> است.</p>
+
+        <p><strong>دلیل:</strong> مشتق‌گیری متوالی، خطاهای گردایش (<span class="lr">Rounding Errors</span>) را در <span class="lr">float32</span> به‌سرعت بزرگ می‌کند.</p>
+
+        <p><strong>علائم هشداردهنده:</strong></p>
+        <ul>
+            <li>تلفات پس از چند <span class="lr">Epoch</span> ناگهان به <span class="lr">NaN</span> تبدیل می‌شود.</li>
+            <li>تلفات با نوسانات شدید (چندین مرتبهٔ بزرگی) همراه است.</li>
+            <li>با وجود کاهش تلفات، خروجی شبکه بی‌ربط و غیرفیزیکی است.</li>
+        </ul>
+
+        <h3>راه‌حل: تغییر به <span class="lr">float64</span> (دقت مضاعف)</h3>
+
+        <div class="lstlisting" style="padding-top:20px;">
+            <span class="comment"># ⚠️ مهم: این دستور باید در ابتدای اسکریپت قرار گیرد</span>
+            torch.set_default_dtype(torch.float64)
+
+            <span class="comment"># روش جایگزین: تبدیل مدل و داده‌ها به float64</span>
+            model = PINN().double()
+            t_col = torch.rand(N_col, 1, requires_grad=True).double() * T
+        </div>
+
+        <p><strong>نکتهٔ فنی:</strong> استفاده از <span class="lr">float64</span> باعث افزایش مصرف حافظه (حدود دو برابر) و کاهش سرعت محاسبات (حدود ۲۰-۳۰\%) می‌شود. اما در مسائل با ابعاد متوسط، این کاهش سرعت قابل‌چشم‌پوشی است.</p>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۲: تأثیر نرمال‌سازی -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-10-pic-02.png" alt="تأثیر نرمال‌سازی بر سطح خطا">
+            <div class="figure-caption">
+                شکل ۱۰-۲: مقایسهٔ عملکرد <span class="lr">PINN</span> با و بدون نرمال‌سازی — خطای L2 در طول آموزش
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۳ -->
+        <!-- ========================================================== -->
+        <h2>ترفند دوم: نرمال‌سازی ورودی‌ها (<span class="lr">Scaling</span>)</h2>
+
+        <h3>مشکل: دامنه‌های عددی ناهمگون</h3>
+
+        <p>در بسیاری از مسائل مهندسی، متغیرهای مستقل دارای دامنه‌های عددی بسیار متفاوتی هستند. برای مثال، در یک مسئلهٔ ارتعاشی، طول بوژی ممکن است ۱ متر ($x \in [0,1]$) و زمان ممکن است ۱۰۰۰ ثانیه ($t \in [0,1000]$) باشد.</p>
+
+        <p>وقتی شبکه ورودی‌هایی با مقیاس‌های متفاوت دریافت می‌کند، گرادیان‌ها ناهمسانگرد می‌شوند و بهینه‌ساز گیج می‌شود.</p>
+
+        <h3>راه‌حل: نرمال‌سازی ورودی‌ها به بازه‌ی [-1, 1] یا [0, 1]</h3>
+
+        <div class="equation">
+            $$ x_{norm} = \frac{x - x_{\min}}{x_{\max} - x_{\min}} \quad \text{(بازه‌ی [0,1])} $$
+        </div>
+        <div class="equation">
+            $$ x_{norm} = 2 \cdot \frac{x - x_{\min}}{x_{\max} - x_{\min}} - 1 \quad \text{(بازه‌ی [-1,1])} $$
+        </div>
+
+        <div class="lstlisting" style="padding-top:20px;">
+            L, T_phys = <span class="number">1.0</span>, <span class="number">1000.0</span>  <span class="comment"># طول و زمان فیزیکی</span>
+
+            x_phys = torch.rand(N_col, <span class="number">1</span>) * L
+            t_phys = torch.rand(N_col, <span class="number">1</span>) * T_phys
+
+            x_norm = x_phys / L
+            t_norm = t_phys / T_phys
+
+            T_pred = model(x_norm, t_norm)
+
+            <span class="comment"># برگردان مقیاس برای مشتقات فیزیکی</span>
+            <span class="comment"># ∂T/∂t_phys = (1/T_phys) * ∂T/∂t_norm</span>
+            <span class="comment"># ∂²T/∂x_phys² = (1/L²) * ∂²T/∂x_norm²</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۴ -->
+        <!-- ========================================================== -->
+        <h2>ترفند سوم: وزن‌دهی پویا به تلفات (<span class="lr">Loss Balancing</span>)</h2>
+
+        <h3>مشکل: تسلط یک مؤلفهٔ تلفات بر بقیه</h3>
+
+        <p>در تابع هزینهٔ <span class="lr">PINN</span>، مؤلفه‌های مختلف ممکن است دامنه‌های عددی بسیار متفاوتی داشته باشند. در نتیجه، شبکه تمام توان خود را برای کاهش مؤلفهٔ بزرگ صرف می‌کند و سایر مؤلفه‌ها را نادیده می‌گیرد.</p>
+
+        <h3>راه‌حل: وزن‌دهی پویا</h3>
+
+        <div class="lstlisting" style="padding-top:20px;">
+            lambda_physics = <span class="number">1.0</span>
+            lambda_data = <span class="number">1.0</span>
+            lambda_bc = <span class="number">1.0</span>
+
+            <span class="keyword">if</span> loss_physics_val > <span class="number">10</span> * max(loss_bc_val, loss_data_val):
+                lambda_physics *= <span class="number">0.9</span>
+                lambda_bc *= <span class="number">1.05</span>
+                lambda_data *= <span class="number">1.05</span>
+            <span class="keyword">elif</span> loss_bc_val > <span class="number">10</span> * max(loss_physics_val, loss_data_val):
+                lambda_bc *= <span class="number">0.9</span>
+                lambda_physics *= <span class="number">1.05</span>
+                lambda_data *= <span class="number">1.05</span>
+            <span class="keyword">elif</span> loss_data_val > <span class="number">10</span> * max(loss_physics_val, loss_bc_val):
+                lambda_data *= <span class="number">0.9</span>
+                lambda_physics *= <span class="number">1.05</span>
+                lambda_bc *= <span class="number">1.05</span>
+
+            loss = lambda_physics * loss_physics + lambda_bc * loss_bc + lambda_data * loss_data
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۳: آموزش علّی -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-10-pic-03.png" alt="مقایسه آموزش تصادفی و گام‌به‌گام">
+            <div class="figure-caption">
+                شکل ۱۰-۳: مقایسهٔ آموزش تصادفی (خط چین قرمز) و گام‌به‌گام (خط ممتد آبی) — همگرایی بهتر در آموزش علّی
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۵ -->
+        <!-- ========================================================== -->
+        <h2>ترفند چهارم: آموزش علّی (<span class="lr">Causal Training</span>)</h2>
+
+        <h3>مشکل: نقض اصل علیت در مسائل وابسته به زمان</h3>
+
+        <p>در مسائل دینامیکی، پاسخ سیستم در زمان‌های بعدی به پاسخ در زمان‌های قبلی وابسته است. <span class="lr">PINN</span> معمولی نقاط کالوکیشن را به‌صورت تصادفی در کل دامنه نمونه‌برداری می‌کند.</p>
+
+        <h3>راه‌حل: آموزش گام‌به‌گام (<span class="lr">Sequential Training</span>)</h3>
+
+        <div class="lstlisting" style="padding-top:20px;">
+            time_segments = [<span class="number">0.25</span>, <span class="number">0.5</span>, <span class="number">0.75</span>, <span class="number">1.0</span>]
+            model = PINN()
+
+            <span class="keyword">for</span> t_max <span class="keyword">in</span> time_segments:
+                <span class="func">print</span>(<span class="string">f'Training on t in [0, {t_max}]'</span>)
+                t_col_segment = torch.rand(N_col, <span class="number">1</span>) * t_max
+
+                <span class="keyword">for</span> epoch <span class="keyword">in</span> range(<span class="number">2000</span>):
+                    <span class="comment"># حلقه‌ی آموزش با t_col_segment</span>
+                    <span class="keyword">pass</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۶ -->
+        <!-- ========================================================== -->
+        <h2>چک‌لیست نهایی عیب‌زدایی <span class="lr">PINN</span></h2>
+
+        <table class="checklist">
+            <thead>
+                <tr>
+                    <th><strong>مرحله</strong></th>
+                    <th><strong>اقدام</strong></th>
+                    <th><strong>شرح</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>۱</td>
+                    <td>بررسی دقت عددی</td>
+                    <td style="text-align: justify;"><span class="lr">torch.set_default_dtype(torch.float64)</span></td>
+                </tr>
+                <tr>
+                    <td>۲</td>
+                    <td>بررسی نرمال‌سازی</td>
+                    <td style="text-align: justify;">نرمال‌سازی ورودی‌ها به بازهٔ [0,1] یا [-1,1]</td>
+                </tr>
+                <tr>
+                    <td>۳</td>
+                    <td>بررسی وزن‌دهی تلفات</td>
+                    <td style="text-align: justify;">تنظیم وزن مؤلفه‌ها یا استفاده از وزن‌دهی پویا</td>
+                </tr>
+                <tr>
+                    <td>۴</td>
+                    <td>بررسی معماری شبکه</td>
+                    <td style="text-align: justify;">استفاده از <span class="lr">tanh</span> یا <span class="lr">sin</span>، تعداد لایه‌ها و نورون‌های مناسب</td>
+                </tr>
+                <tr>
+                    <td>۵</td>
+                    <td>بررسی نقاط کالوکیشن</td>
+                    <td style="text-align: justify;">حداقل ۱۰۰۰ نقطه و توزیع مناسب</td>
+                </tr>
+                <tr>
+                    <td>۶</td>
+                    <td>بررسی نرخ یادگیری</td>
+                    <td style="text-align: justify;"><span class="lr">lr = 1e-3</span> برای شروع</td>
+                </tr>
+                <tr>
+                    <td>۷</td>
+                    <td>بررسی آموزش علّی</td>
+                    <td style="text-align: justify;">استفاده از آموزش گام‌به‌گام در صورت نیاز</td>
+                </tr>
+                <tr>
+                    <td>۸</td>
+                    <td>بررسی گراف محاسباتی</td>
+                    <td style="text-align: justify;">تنظیم صحیح <span class="lr">create_graph=True</span> و <span class="lr">retain_graph=True</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ========================================================== -->
+        <!-- جمع‌بندی -->
+        <!-- ========================================================== -->
+        <h2>جمع‌بندی و مسیر پیش‌رو</h2>
+
+        <p>در این فصل، با چهار ترفند حیاتی برای پایدارسازی آموزش <span class="lr">PINN</span> آشنا شدیم. نکات کلیدی:</p>
+
+        <ol>
+            <li><strong>دقت عددی (<span class="lr">float64</span>):</strong> ساده‌ترین راه برای جلوگیری از واگرایی ناشی از خطاهای گردایش.</li>
+            <li><strong>نرمال‌سازی:</strong> از ناهمسانگردی گرادیان‌ها جلوگیری می‌کند و سرعت همگرایی را افزایش می‌دهد.</li>
+            <li><strong>وزن‌دهی پویا:</strong> از تسلط یک مؤلفهٔ تلفات بر بقیه جلوگیری می‌کند.</li>
+            <li><strong>آموزش علّی:</strong> در مسائل وابسته به زمان، آموزش گام‌به‌گام رعایت اصل علیت را تضمین می‌کند.</li>
+        </ol>
+
+        <p><strong>پل به فصل یازدهم:</strong> در فصل بعد، با روش‌های پیشرفتهٔ اعمال شرایط مرزی (<span class="lr">SDF</span> و قید سخت) آشنا خواهید شد.</p>
+
+        <!-- ========================================================== -->
+        <!-- تمرین‌های عملی -->
+        <!-- ========================================================== -->
+        <h2 style="margin-top:40px;">تمرین‌های عملی</h2>
+
+        <ol>
+            <li>
+                <strong>تمرین ۱ (شناسایی مشکل در یک کد واگرا):</strong> یک کد <span class="lr">PINN</span> با <span class="lr">float32</span> که واگرا می‌شود را با چک‌لیست اصلاح کنید.
+            </li>
+            <li>
+                <strong>تمرین ۲ (تأثیر نرمال‌سازی بر سرعت همگرایی):</strong> مسئلهٔ انتقال حرارت را با دامنهٔ زمانی $t \in [0,1000]$ با و بدون نرمال‌سازی حل کنید.
+            </li>
+            <li>
+                <strong>تمرین ۳ (وزن‌دهی پویا در مسئلهٔ تخمین حالت):</strong> تخمین حالت را با وزن‌دهی یکسان و پویا مقایسه کنید.
+            </li>
+        </ol>
+
+        <!-- ========================================================== -->
+        <!-- مرجع تکمیلی -->
+        <!-- ========================================================== -->
+        <div class="reference">
+            <strong>مرجع تکمیلی</strong><br>
+            <span class="lr">Wang et al. (2021). "Understanding and mitigating gradient flow pathologies in physics-informed neural networks."</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- پانویس -->
+        <!-- ========================================================== -->
+        <div class="footer-line">
+            — ۱۹۰ —
+        </div>
+
+    </div>
+
+</body>
+</html>

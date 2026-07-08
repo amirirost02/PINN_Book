@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فهرست کتاب</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .book-index {
+            max-width: 780px;
+            width: 100%;
+            background: #ffffff;
+            padding: 50px 60px 55px 60px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            border-radius: 6px;
+            margin: 0 auto;
+        }
+        .chapter-list {
+            list-style: none;
+            padding: 0;
+        }
+        .chapter-list li {
+            border-bottom: 1px solid #e2edf0;
+            padding: 14px 0;
+        }
+        .chapter-list a {
+            color: #0a192f;
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+        .chapter-list a:hover {
+            color: #2c7a7b;
+            padding-right: 6px;
+        }
+        .chapter-list .page-num {
+            color: #4a5a6a;
+            font-size: 14px;
+            font-family: 'Noto Serif', serif;
+        }
+        .index-footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #4a5a6a;
+            border-top: 1px solid #e2edf0;
+            padding-top: 20px;
+            font-size: 14px;
+        }
+        @media (max-width: 650px) {
+            .book-index {
+                padding: 25px 20px;
+            }
+            .chapter-list a {
+                font-size: 16px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="book-index">
+        <h1 style="color:#0a192f; border-bottom:3px solid #2c7a7b; padding-bottom:12px; margin-bottom:30px;">
+            📚 فهرست مطالب
+        </h1>
+        <ul class="chapter-list">
+            <!-- ========================================================== -->
+            <!-- لیست فصل‌ها (هر بار که فایل جدید اضافه می‌شود، به‌روز می‌شود) -->
+            <!-- ========================================================== -->
+            <li><a href="chapter1.html"><span>فصل ۱: PINN چیست و چه نیازی به آن داریم؟</span><span class="page-num">۱</span></a></li>
+            <li><a href="chapter2.html"><span>فصل ۲: [عنوان]</span><span class="page-num">۲۵</span></a></li>
+            <!-- بقیه فصل‌ها به همین الگو -->
+        </ul>
+        <div class="index-footer">
+            برای مطالعه، روی عنوان هر فصل کلیک کنید.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فصل ۱۲: چالش دوم — انتخاب هوشمند نقاط کالوکیشن و معماری‌های مقاوم</title>
+
+    <!-- لینک به فونت‌ها -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+    <!-- لینک به استایل و اسکریپت مشترک -->
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+
+    <!-- MathJax برای فرمول‌ها -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ['$', '$'],
+                    ['\\(', '\\)']
+                ],
+                displayMath: [
+                    ['$$', '$$'],
+                    ['\\[', '\\]']
+                ],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+
+    <style>
+        .figure-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e2edf0;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .figure-caption {
+            font-size: 14px;
+            color: #4a5a6a;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        .figure-caption .lr {
+            font-weight: 600;
+        }
+
+        .lstlisting {
+            direction: ltr;
+            background: #1e2b3c;
+            color: #e2e8f0;
+            padding: 18px 22px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            position: relative;
+            padding-top: 50px;
+        }
+
+        .lstlisting .comment {
+            color: #7f9f7f;
+        }
+        .lstlisting .keyword {
+            color: #f7c948;
+        }
+        .lstlisting .func {
+            color: #7fc1f7;
+        }
+        .lstlisting .string {
+            color: #b5d99c;
+        }
+        .lstlisting .number {
+            color: #e8a87c;
+        }
+
+        .lstlisting .copy-btn {
+            float: left;
+            margin-top: -5px;
+            margin-bottom: 10px;
+            background: #2c7a7b;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .lstlisting .copy-btn:hover {
+            background: #1a5a5b;
+        }
+
+        table.compare-table td {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="book-page">
+
+        <!-- ========================================================== -->
+        <!-- سرصفحه -->
+        <!-- ========================================================== -->
+        <div class="header-line">
+            <span class="header-left">فصل ۱۲</span>
+            <span class="header-right">چالش دوم — انتخاب هوشمند نقاط کالوکیشن و معماری‌های مقاوم</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- فاصله‌ی ۱۰۰px از بالا -->
+        <!-- ========================================================== -->
+        <div class="chapter-spacer"></div>
+
+        <!-- ========================================================== -->
+        <!-- عنوان اصلی -->
+        <!-- ========================================================== -->
+        <h1>فصل ۱۲: چالش دوم — انتخاب هوشمند نقاط کالوکیشن و معماری‌های مقاوم</h1>
+
+        <!-- ========================================================== -->
+        <!-- جعبه اهداف -->
+        <!-- ========================================================== -->
+        <div class="pinnbox">
+            <strong>اهداف یادگیری</strong>
+            <p style="margin-top:6px;">پس از مطالعهٔ این فصل، شما قادر خواهید بود:</p>
+            <ol>
+                <li>محدودیت‌های توزیع یکنواخت و تصادفی نقاط کالوکیشن را در مسائل با گرادیان شدید یا فرکانس بالا توضیح دهید.</li>
+                <li>روش نمونه‌برداری تطبیقی مبتنی بر باقیمانده (<span class="lr">RAR</span>) را در دو نسخهٔ «جایگزینی» و «افزودن» پیاده‌سازی کنید.</li>
+                <li>مفهوم سوگیری طیفی (<span class="lr">Spectral Bias</span>) را در شبکه‌های عصبی توضیح دهید.</li>
+                <li>معماری <span class="lr">SIREN</span> (شبکه‌های سینوسی) را برای مسائل با فرکانس بالا به‌کار بگیرید.</li>
+                <li>روش مناسب انتخاب نقاط کالوکیشن و معماری شبکه را بر اساس ویژگی‌های مسئله انتخاب کنید.</li>
+            </ol>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۱ -->
+        <!-- ========================================================== -->
+        <h2>چالش دوم: وقتی نقاط تصادفی کافی نیستند</h2>
+
+        <p>در تمام فصول گذشته، نقاط کالوکیشن را به‌صورت <strong>یکنواخت و تصادفی</strong> در داخل دامنه تولید کردیم. این روش در مسائل با <strong>نواحی با تغییرات شدید</strong> ناکارآمد است:</p>
+
+        <ul>
+            <li><strong>نقاط کافی در نواحی بحرانی وجود ندارد:</strong> لایه‌های مرزی ممکن است تنها ۱\% از دامنه را اشغال کنند، اما ۹۰\% خطای معادله در آن‌ها متمرکز است.</li>
+            <li><strong>هدررفت منابع در نواحی هموار:</strong> نقاط زیادی در نواحی با تغییرات آهسته قرار می‌گیرند.</li>
+        </ul>
+
+        <p><strong>مثال در حوزهٔ راه‌آهن:</strong> در تحلیل آکوستیک یک واگن قطار، امواج صوتی با فرکانس بالا نیاز به نقاط متراکم‌تری در نواحی با گرادیان فشار بالا دارند.</p>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۱: مقایسه توزیع نقاط -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-12-pic-01.png" alt="مقایسه توزیع نقاط تصادفی یکنواخت و RAR">
+            <div class="figure-caption">
+                شکل ۱۲-۱: مقایسهٔ توزیع نقاط کالوکیشن — نقاط تصادفی یکنواخت (چپ) و <span class="lr">RAR</span> (راست) با تمرکز در نواحی با خطای بالا
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۲ -->
+        <!-- ========================================================== -->
+        <h2>نمونه‌برداری تطبیقی مبتنی بر باقیمانده (<span class="lr">RAR</span>)</h2>
+
+        <h3>ایدهٔ اصلی</h3>
+
+        <p>در روش <span class="lr">RAR</span> (<span class="lr">Residual-based Adaptive Refinement</span>)، هر چند <span class="lr">Epoch</span> یکبار، مقدار باقیماندهٔ معادله در نقاط کالوکیشن محاسبه می‌شود و نقاط با بیشترین خطا با نقاط جدید جایگزین یا اضافه می‌شوند.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><strong>نسخه</strong></th>
+                    <th><strong>توضیح</strong></th>
+                    <th><strong>مزایا</strong></th>
+                    <th><strong>معایب</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>جایگزینی</strong></td>
+                    <td style="text-align: justify;">نقاط با خطای بالا با نقاط جدید جایگزین می‌شوند</td>
+                    <td>تعداد نقاط ثابت</td>
+                    <td>ممکن است اطلاعات نواحی هموار از دست برود</td>
+                </tr>
+                <tr>
+                    <td><strong>افزودن</strong></td>
+                    <td style="text-align: justify;">نقاط جدید به نقاط با خطای بالا اضافه می‌شوند</td>
+                    <td>دقت بالاتر</td>
+                    <td>تعداد نقاط افزایش می‌یابد</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>پیاده‌سازی <span class="lr">RAR</span></h3>
+
+        <div class="lstlisting">
+            <span class="keyword">def</span> <span class="func">adaptive_refinement</span>(model, x_col, t_col, alpha, method='replace', n_refine=0.1):
+                <span class="keyword">with</span> torch.no_grad():
+                    T_pred = model(x_col, t_col)
+                    T_t = torch.autograd.grad(T_pred, t_col, grad_outputs=torch.ones_like(T_pred),
+                                              create_graph=False, retain_graph=False)[0]
+                    T_x = torch.autograd.grad(T_pred, x_col, grad_outputs=torch.ones_like(T_pred),
+                                              create_graph=False, retain_graph=False)[0]
+                    T_xx = torch.autograd.grad(T_x, x_col, grad_outputs=torch.ones_like(T_x),
+                                               create_graph=False, retain_graph=False)[0]
+                    residual = T_t - alpha * T_xx
+                    residual_abs = torch.abs(residual)
+
+                    n_points = x_col.shape[0]
+                    n_high = int(n_points * n_refine)
+                    _, indices = torch.topk(residual_abs, n_high)
+                    indices = indices.detach().cpu().numpy().astype(int)
+
+                    x_new = x_col[indices] + <span class="number">0.02</span> * torch.randn_like(x_col[indices])
+                    t_new = t_col[indices] + <span class="number">0.02</span> * torch.randn_like(t_col[indices])
+                    x_new = torch.clamp(x_new, <span class="number">0</span>, <span class="number">1</span>)
+                    t_new = torch.clamp(t_new, <span class="number">0</span>, <span class="number">1</span>)
+                    x_new.requires_grad_(True)
+                    t_new.requires_grad_(True)
+
+                    <span class="keyword">if</span> method == 'replace':
+                        x_col_new = x_col.clone()
+                        t_col_new = t_col.clone()
+                        x_col_new[indices] = x_new
+                        t_col_new[indices] = t_new
+                    <span class="keyword">else</span>:
+                        x_col_new = torch.cat([x_col, x_new], dim=0)
+                        t_col_new = torch.cat([t_col, t_new], dim=0)
+
+                    x_col_new.requires_grad_(True)
+                    t_col_new.requires_grad_(True)
+                    <span class="keyword">return</span> x_col_new, t_col_new
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۳ -->
+        <!-- ========================================================== -->
+        <h2>چالش معماری: وقتی <span class="lr">ReLU</span> کافی نیست</h2>
+
+        <h3>مشکل <span class="lr">ReLU</span> در <span class="lr">PINN</span></h3>
+
+        <p>تابع فعال‌سازی <span class="lr">ReLU</span> مشتق دوم صفر دارد و برای مسائل با مشتقات مرتبهٔ بالا مناسب نیست.</p>
+
+        <h3>سوگیری طیفی (<span class="lr">Spectral Bias</span>) و نقش <span class="lr">SIREN</span></h3>
+
+        <p><strong>سوگیری طیفی:</strong> شبکه‌های عصبی هموار (مانند <span class="lr">tanh</span>) ابتدا مؤلفه‌های فرکانس پایین را یاد می‌گیرند.</p>
+
+        <p><strong><span class="lr">SIREN</span> (<span class="lr">Sinusoidal Representation Network</span>):</strong> با تابع فعال‌سازی $\sin(\omega_0 x)$ و مقداردهی اولیهٔ خاص، سوگیری طیفی را کاهش می‌دهد.</p>
+
+        <div class="equation">
+            $$ \sin(\omega_0 \cdot (Wx + b)) $$
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۲: نمایش سوگیری طیفی -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-12-pic-02.png" alt="نمایش سوگیری طیفی در شبکه‌های معمولی و SIREN">
+            <div class="figure-caption">
+                شکل ۱۲-۲: مقایسهٔ سوگیری طیفی — شبکهٔ معمولی (بالا) و <span class="lr">SIREN</span> (پایین) — <span class="lr">SIREN</span> مؤلفه‌های فرکانس بالا را سریع‌تر یاد می‌گیرد
+            </div>
+        </div>
+
+        <h3>پیاده‌سازی <span class="lr">SIREN</span></h3>
+
+        <div class="lstlisting">
+            <span class="keyword">import</span> torch.nn.init <span class="keyword">as</span> init
+            <span class="keyword">import</span> math
+
+            <span class="keyword">class</span> <span class="func">SIRENLayer</span>(nn.Module):
+                <span class="keyword">def</span> <span class="func">__init__</span>(self, in_features, out_features, omega_0=<span class="number">30.0</span>, is_first=<span class="keyword">False</span>):
+                    <span class="keyword">super</span>(SIRENLayer, self).__init__()
+                    self.omega_0 = omega_0
+                    self.is_first = is_first
+                    self.linear = nn.Linear(in_features, out_features)
+                    self.init_weights()
+
+                <span class="keyword">def</span> <span class="func">init_weights</span>(self):
+                    <span class="keyword">if</span> self.is_first:
+                        init.uniform_(self.linear.weight, -<span class="number">1</span>/self.linear.in_features,
+                                       <span class="number">1</span>/self.linear.in_features)
+                    <span class="keyword">else</span>:
+                        init.uniform_(self.linear.weight,
+                                     -math.sqrt(<span class="number">6</span>/self.linear.in_features)/self.omega_0,
+                                     math.sqrt(<span class="number">6</span>/self.linear.in_features)/self.omega_0)
+                    init.zeros_(self.linear.bias)
+
+                <span class="keyword">def</span> <span class="func">forward</span>(self, x):
+                    <span class="keyword">return</span> torch.sin(self.omega_0 * self.linear(x))
+
+            <span class="keyword">class</span> <span class="func">SIREN_PINN</span>(nn.Module):
+                <span class="keyword">def</span> <span class="func">__init__</span>(self, layers=[2, 50, 50, 50, 1], omega_0=<span class="number">30.0</span>):
+                    <span class="keyword">super</span>(SIREN_PINN, self).__init__()
+                    self.net = nn.Sequential()
+                    <span class="keyword">for</span> i <span class="keyword">in</span> range(len(layers) - <span class="number">1</span>):
+                        is_first = (i == <span class="number">0</span>)
+                        self.net.add_module(<span class="string">f'siren_{i}'</span>,
+                                           SIRENLayer(layers[i], layers[i+1], omega_0, is_first))
+
+                <span class="keyword">def</span> <span class="func">forward</span>(self, x, t):
+                    <span class="keyword">return</span> self.net(torch.cat([x, t], dim=<span class="number">1</span>))
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۳: مقایسه روش‌های مختلف -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-12-pic-03.png" alt="مقایسه خطای L2 روش‌های مختلف">
+            <div class="figure-caption">
+                شکل ۱۲-۳: مقایسهٔ خطای L2 در روش‌های مختلف — ترکیب <span class="lr">RAR</span> و <span class="lr">SIREN</span> بهترین عملکرد را دارد
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۴ -->
+        <!-- ========================================================== -->
+        <h2>مقایسهٔ روش‌های مختلف</h2>
+
+        <table class="compare-table">
+            <thead>
+                <tr>
+                    <th><strong>روش</strong></th>
+                    <th><strong>تعداد نقاط</strong></th>
+                    <th><strong>خطای L2</strong></th>
+                    <th><strong>زمان همگرایی</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align: justify;">نقاط تصادفی یکنواخت + <span class="lr">tanh</span></td>
+                    <td>۲۰۰۰</td>
+                    <td>$4.2 \times 10^{-3}$</td>
+                    <td>۸۰۰۰</td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;">نقاط تصادفی یکنواخت + <span class="lr">SIREN</span></td>
+                    <td>۲۰۰۰</td>
+                    <td>$1.8 \times 10^{-3}$</td>
+                    <td>۶۰۰۰</td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;"><span class="lr">RAR</span> (جایگزینی) + <span class="lr">tanh</span></td>
+                    <td>۲۰۰۰</td>
+                    <td>$8.5 \times 10^{-4}$</td>
+                    <td>۵۰۰۰</td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;"><span class="lr">RAR</span> (افزودن) + <span class="lr">tanh</span></td>
+                    <td>۲۵۰۰</td>
+                    <td>$5.1 \times 10^{-4}$</td>
+                    <td>۶۰۰۰</td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;"><span class="lr">RAR</span> (جایگزینی) + <span class="lr">SIREN</span></td>
+                    <td>۲۰۰۰</td>
+                    <td>$2.3 \times 10^{-5}$</td>
+                    <td>۴۰۰۰</td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;"><span class="lr">RAR</span> (افزودن) + <span class="lr">SIREN</span></td>
+                    <td>۲۵۰۰</td>
+                    <td>$9.8 \times 10^{-6}$</td>
+                    <td>۴۵۰۰</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ========================================================== -->
+        <!-- جمع‌بندی -->
+        <!-- ========================================================== -->
+        <h2>جمع‌بندی و مسیر پیش‌رو</h2>
+
+        <p>در این فصل، با دو چالش مهم در انتخاب نقاط کالوکیشن و معماری شبکه آشنا شدیم. نکات کلیدی:</p>
+
+        <ol>
+            <li><strong>نمونه‌برداری تطبیقی (<span class="lr">RAR</span>):</strong> با تمرکز نقاط در نواحی با خطای بالا، دقت را بهبود می‌بخشد.</li>
+            <li><strong>سوگیری طیفی:</strong> شبکه‌های عصبی هموار ابتدا فرکانس‌های پایین را یاد می‌گیرند. <span class="lr">SIREN</span> این سوگیری را کاهش می‌دهد.</li>
+            <li><strong>ترکیب <span class="lr">RAR</span> و <span class="lr">SIREN</span>:</strong> بهترین عملکرد را در مسائل چالش‌برانگیز ارائه می‌دهد.</li>
+        </ol>
+
+        <p><strong>پل به فصل سیزدهم:</strong> در فصل بعد، با چالش مسائل معکوس بدحالت، نویز، و پروژهٔ نهایی آشنا خواهید شد.</p>
+
+        <!-- ========================================================== -->
+        <!-- تمرین‌های عملی -->
+        <!-- ========================================================== -->
+        <h2 style="margin-top:40px;">تمرین‌های عملی</h2>
+
+        <ol>
+            <li>
+                <strong>تمرین ۱:</strong> روش‌های جایگزینی و افزودن <span class="lr">RAR</span> را مقایسه کنید.
+            </li>
+            <li>
+                <strong>تمرین ۲:</strong> <span class="lr">SIREN</span> و <span class="lr">tanh</span> را برای مسئلهٔ هلمهولتز با $k = 10$ و $k = 50$ مقایسه کنید.
+            </li>
+            <li>
+                <strong>تمرین ۳:</strong> ترکیب <span class="lr">RAR</span> و <span class="lr">SIREN</span> را برای مسئلهٔ آکوستیک دو بعدی پیاده‌سازی کنید.
+            </li>
+        </ol>
+
+        <!-- ========================================================== -->
+        <!-- مرجع تکمیلی -->
+        <!-- ========================================================== -->
+        <div class="reference">
+            <strong>مرجع تکمیلی</strong><br>
+            <span class="lr">Lu et al. (2021). "Adaptive sampling for physics-informed neural networks."</span><br>
+            <span class="lr">Sitzmann et al. (2020). "Implicit neural representations with periodic activation functions."</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- پانویس -->
+        <!-- ========================================================== -->
+        <div class="footer-line">
+            — ۲۳۰ —
+        </div>
+
+    </div>
+
+</body>
+</html>

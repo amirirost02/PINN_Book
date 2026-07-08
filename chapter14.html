@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فصل ۱۴: چشم‌انداز پیشرفته — DeepONet، FNO، و B-PINN</title>
+
+    <!-- لینک به فونت‌ها -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+    <!-- لینک به استایل و اسکریپت مشترک -->
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+
+    <!-- MathJax برای فرمول‌ها -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ['$', '$'],
+                    ['\\(', '\\)']
+                ],
+                displayMath: [
+                    ['$$', '$$'],
+                    ['\\[', '\\]']
+                ],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+
+    <style>
+        .figure-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e2edf0;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .figure-caption {
+            font-size: 14px;
+            color: #4a5a6a;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        .figure-caption .lr {
+            font-weight: 600;
+        }
+
+        .lstlisting {
+            direction: ltr;
+            background: #1e2b3c;
+            color: #e2e8f0;
+            padding: 18px 22px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            position: relative;
+            padding-top: 50px;
+        }
+
+        .lstlisting .comment {
+            color: #7f9f7f;
+        }
+        .lstlisting .keyword {
+            color: #f7c948;
+        }
+        .lstlisting .func {
+            color: #7fc1f7;
+        }
+        .lstlisting .string {
+            color: #b5d99c;
+        }
+        .lstlisting .number {
+            color: #e8a87c;
+        }
+
+        .lstlisting .copy-btn {
+            float: left;
+            margin-top: -5px;
+            margin-bottom: 10px;
+            background: #2c7a7b;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .lstlisting .copy-btn:hover {
+            background: #1a5a5b;
+        }
+
+        table.compare-table td {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="book-page">
+
+        <!-- ========================================================== -->
+        <!-- سرصفحه -->
+        <!-- ========================================================== -->
+        <div class="header-line">
+            <span class="header-left">فصل ۱۴</span>
+            <span class="header-right">چشم‌انداز پیشرفته — <span class="lr">DeepONet</span>، <span class="lr">FNO</span>، و <span class="lr">B-PINN</span></span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- فاصله‌ی ۱۰۰px از بالا -->
+        <!-- ========================================================== -->
+        <div class="chapter-spacer"></div>
+
+        <!-- ========================================================== -->
+        <!-- عنوان اصلی -->
+        <!-- ========================================================== -->
+        <h1>فصل ۱۴: چشم‌انداز پیشرفته — <span class="lr">DeepONet</span>، <span class="lr">FNO</span>، و <span class="lr">B-PINN</span></h1>
+
+        <!-- ========================================================== -->
+        <!-- جعبه اهداف -->
+        <!-- ========================================================== -->
+        <div class="pinnbox">
+            <strong>اهداف یادگیری</strong>
+            <p style="margin-top:6px;">پس از مطالعهٔ این فصل، شما قادر خواهید بود:</p>
+            <ol>
+                <li>مفهوم «یادگیری عملگرها» (<span class="lr">Operator Learning</span>) را در مقابل «یادگیری توابع» توضیح دهید.</li>
+                <li>معماری <span class="lr">DeepONet</span> را تشریح کرده و یک پیاده‌سازی سادهٔ آن را در <span class="lr">PyTorch</span> اجرا کنید.</li>
+                <li>تفاوت <span class="lr">FNO</span> (<span class="lr">Fourier Neural Operator</span>) با <span class="lr">PINN</span> و <span class="lr">DeepONet</span> را در حل معادلات دیفرانسیل بیان کنید.</li>
+                <li>مفهوم <span class="lr">B-PINN</span> (<span class="lr">Bayesian PINN</span>) و روش <span class="lr">MC-Dropout</span> را برای تخمین عدم‌قطعیت در مسائل مهندسی پیاده‌سازی کنید.</li>
+                <li>کاربردهای بالقوهٔ <span class="lr">PINN</span> در کنترل بهینه و طراحی بهینهٔ توپولوژی را شناسایی کنید.</li>
+                <li>مسیر پژوهشی و منابع پیشرو را برای مطالعهٔ بیشتر در حوزهٔ <span class="lr">PINN</span> ترسیم نمایید.</li>
+            </ol>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۱ -->
+        <!-- ========================================================== -->
+        <h2>چرا به «فراتر از <span class="lr">PINN</span>» نیاز داریم؟</h2>
+
+        <p><span class="lr">PINN</span> دو محدودیت اساسی دارد:</p>
+        <ol>
+            <li><strong>حل تکی برای هر مسئله:</strong> هر بار که شرایط تغییر می‌کند، باید از ابتدا آموزش داد.</li>
+            <li><strong>پیش‌بینی قطعی:</strong> هیچ تخمینی از عدم‌قطعیت ارائه نمی‌دهد.</li>
+        </ol>
+
+        <p>این فصل سه حوزهٔ پیشرفته را معرفی می‌کند:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><strong>حوزه</strong></th>
+                    <th><strong>سوال کلیدی</strong></th>
+                    <th><strong>کاربرد اصلی</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align: justify;"><strong>یادگیری عملگرها</strong></td>
+                    <td style="text-align: justify;">چگونه یک بار شبکه را آموزش دهیم برای هر تابع ورودی؟</td>
+                    <td style="text-align: justify;">طراحی بهینه، تحلیل حساسیت</td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;"><strong><span class="lr">PINN</span> بیزی</strong></td>
+                    <td style="text-align: justify;">چگونه عدم‌قطعیت پیش‌بینی‌ها را تخمین بزنیم؟</td>
+                    <td style="text-align: justify;">تصمیم‌گیری در شرایط عدم‌قطعیت</td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;"><strong>کنترل و طراحی بهینه</strong></td>
+                    <td style="text-align: justify;">چگونه از <span class="lr">PINN</span> برای کنترل بهینه استفاده کنیم؟</td>
+                    <td style="text-align: justify;">کنترل بهینه، بهینه‌سازی توپولوژی</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۱: مقایسه معماری‌ها -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-14-pic-01.png" alt="مقایسه معماری‌های PINN، DeepONet و FNO">
+            <div class="figure-caption">
+                شکل ۱۴-۱: مقایسهٔ مفهومی معماری‌های <span class="lr">PINN</span> (چپ)، <span class="lr">DeepONet</span> (وسط)، و <span class="lr">FNO</span> (راست)
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۲ -->
+        <!-- ========================================================== -->
+        <h2>یادگیری عملگرها — از حل یک مسئله تا حل خانواده‌ای از مسائل</h2>
+
+        <p>در تمام فصول گذشته، شبکه‌های عصبی را برای یادگیری <strong>توابع</strong> به کار می‌گرفتیم. در یادگیری عملگرها، هدف یافتن نگاشتی از یک <strong>تابع</strong> به یک <strong>تابع</strong> دیگر است.</p>
+
+        <p><strong>مثال:</strong> عملگر مشتق‌گیری $\frac{d}{dx}$ یک تابع را به تابع دیگر تبدیل می‌کند.</p>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۳ -->
+        <!-- ========================================================== -->
+        <h2><span class="lr">DeepONet</span>: شبکه‌های عملگری عمیق</h2>
+
+        <h3>معماری <span class="lr">DeepONet</span></h3>
+
+        <p><strong>شاخهٔ تابعی (<span class="lr">Branch Network</span>):</strong> مقادیر گسسته‌شدهٔ تابع ورودی را به بردار $b \in \mathbb{R}^p$ تبدیل می‌کند.</p>
+
+        <p><strong>شاخهٔ مکانی (<span class="lr">Trunk Network</span>):</strong> مختصات نقطهٔ خروجی را به بردار $t \in \mathbb{R}^p$ تبدیل می‌کند.</p>
+
+        <p><strong>ترکیب نهایی:</strong></p>
+        <div class="equation">
+            $$ u(x) = \sum_{i=1}^{p} b_i \cdot t_i = \langle b, t \rangle $$
+        </div>
+
+        <h3>کد <span class="lr">DeepONet</span></h3>
+
+        <div class="lstlisting">
+            <span class="keyword">class</span> <span class="func">DeepONet</span>(nn.Module):
+                <span class="keyword">def</span> <span class="func">__init__</span>(self, m=<span class="number">20</span>, p=<span class="number">50</span>, hidden_size=<span class="number">64</span>):
+                    <span class="keyword">super</span>(DeepONet, self).__init__()
+
+                    self.branch_net = nn.Sequential(
+                        nn.Linear(m, hidden_size),
+                        nn.Tanh(),
+                        nn.Linear(hidden_size, hidden_size),
+                        nn.Tanh(),
+                        nn.Linear(hidden_size, p)
+                    )
+
+                    self.trunk_net = nn.Sequential(
+                        nn.Linear(<span class="number">1</span>, hidden_size),
+                        nn.Tanh(),
+                        nn.Linear(hidden_size, hidden_size),
+                        nn.Tanh(),
+                        nn.Linear(hidden_size, p)
+                    )
+
+                <span class="keyword">def</span> <span class="func">forward</span>(self, branch_input, trunk_input):
+                    b = self.branch_net(branch_input)
+                    t = self.trunk_net(trunk_input)
+                    output = torch.sum(b * t, dim=<span class="number">1</span>, keepdim=True)
+                    <span class="keyword">return</span> output
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۴ -->
+        <!-- ========================================================== -->
+        <h2><span class="lr">FNO</span> (<span class="lr">Fourier Neural Operator</span>)</h2>
+
+        <p><strong>ایدهٔ اصلی:</strong> در هر لایه، داده‌ها با تبدیل فوریه به حوزهٔ فرکانس منتقل می‌شوند و یک فیلتر قابل‌آموزش روی مؤلفه‌های فرکانسی اعمال می‌شود.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><strong>معیار</strong></th>
+                    <th><strong><span class="lr">DeepONet</span></strong></th>
+                    <th><strong><span class="lr">FNO</span></strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align: justify;">رویکرد اصلی</td>
+                    <td style="text-align: justify;">دو شاخه (تابعی + مکانی)</td>
+                    <td style="text-align: justify;">تبدیل فوریه در لایه‌ها</td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;">پیچیدگی پیاده‌سازی</td>
+                    <td style="text-align: justify;">ساده</td>
+                    <td style="text-align: justify;">پیچیده (نیاز به <span class="lr">FFT</span>)</td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;">دقت در فرکانس‌های بالا</td>
+                    <td style="text-align: justify;">خوب</td>
+                    <td style="text-align: justify;">عالی</td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;">سرعت آموزش</td>
+                    <td style="text-align: justify;">متوسط</td>
+                    <td style="text-align: justify;">بالا (برای نقاط زیاد)</td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;">مناسب برای</td>
+                    <td style="text-align: justify;">مسائل با تعداد نقاط کم</td>
+                    <td style="text-align: justify;">مسائل با مش‌بندی ریز</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۵ -->
+        <!-- ========================================================== -->
+        <h2><span class="lr">B-PINN</span> (<span class="lr">Bayesian PINN</span>): تخمین عدم‌قطعیت</h2>
+
+        <h3>چرا عدم‌قطعیت مهم است؟</h3>
+
+        <p><span class="lr">PINN</span> معمولی یک پیش‌بینی قطعی ارائه می‌دهد. <span class="lr">B-PINN</span> با ارائهٔ توزیع احتمالی، عدم‌قطعیت را مشخص می‌کند.</p>
+
+        <h3>روش <span class="lr">MC-Dropout</span></h3>
+
+        <ol>
+            <li>لایه‌های <span class="lr">Dropout</span> را به معماری <span class="lr">PINN</span> اضافه می‌کنیم.</li>
+            <li>در زمان ارزیابی، <span class="lr">model.train()</span> را فعال می‌کنیم.</li>
+            <li>شبکه را $N$ بار (معمولاً $N = 100$) اجرا می‌کنیم.</li>
+            <li>میانگین و انحراف معیار خروجی‌ها را محاسبه می‌کنیم.</li>
+        </ol>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۲: تخمین عدم‌قطعیت با B-PINN -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-14-pic-02.png" alt="تخمین عدم‌قطعیت با B-PINN و MC-Dropout">
+            <div class="figure-caption">
+                شکل ۱۴-۲: تخمین عدم‌قطعیت با <span class="lr">B-PINN</span> — نوار اطمینان ۹۵\% (ناحیه خاکستری) در کنار پیش‌بینی میانگین (خط آبی) و داده‌های واقعی (نقاط قرمز)
+            </div>
+        </div>
+
+        <div class="lstlisting">
+            <span class="keyword">class</span> <span class="func">PINN_with_Dropout</span>(nn.Module):
+                <span class="keyword">def</span> <span class="func">__init__</span>(self, layers=[1, 50, 50, 50, 1], dropout_rate=<span class="number">0.1</span>):
+                    <span class="keyword">super</span>(PINN_with_Dropout, self).__init__()
+                    self.net = nn.Sequential()
+                    <span class="keyword">for</span> i <span class="keyword">in</span> range(len(layers) - <span class="number">1</span>):
+                        self.net.add_module(<span class="string">f'linear_{i}'</span>, nn.Linear(layers[i], layers[i+1]))
+                        <span class="keyword">if</span> i < len(layers) - <span class="number">2</span>:
+                            self.net.add_module(<span class="string">f'dropout_{i}'</span>, nn.Dropout(dropout_rate))
+                            self.net.add_module(<span class="string">f'tanh_{i}'</span>, nn.Tanh())
+
+                <span class="keyword">def</span> <span class="func">forward</span>(self, x):
+                    <span class="keyword">return</span> self.net(x)
+
+            <span class="keyword">def</span> <span class="func">mc_dropout_prediction</span>(model, x_input, n_samples=<span class="number">100</span>):
+                model.train()
+                predictions = []
+                <span class="keyword">with</span> torch.no_grad():
+                    <span class="keyword">for</span> _ <span class="keyword">in</span> range(n_samples):
+                        pred = model(x_input)
+                        predictions.append(pred)
+                predictions = torch.stack(predictions, dim=<span class="number">0</span>)
+                mean = predictions.mean(dim=<span class="number">0</span>)
+                std = predictions.std(dim=<span class="number">0</span>)
+                <span class="keyword">return</span> mean, std
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۶ -->
+        <!-- ========================================================== -->
+        <h2><span class="lr">PINN</span> در کنترل بهینه و طراحی بهینهٔ توپولوژی</h2>
+
+        <h3>کنترل بهینه با <span class="lr">PINN</span></h3>
+
+        <p>دو روش اصلی:</p>
+        <ol>
+            <li><strong>حل معادلهٔ <span class="lr">HJB</span>:</strong> <span class="lr">PINN</span> معادلهٔ هامیلتون-ژاکوبی-بلمن را حل کرده و سیگنال کنترل بهینه را استخراج می‌کند.</li>
+            <li><strong><span class="lr">PINN</span> به‌عنوان جایگزین مدل:</strong> در کنترل پیش‌بینی مدل (<span class="lr">MPC</span>)، زمان محاسبات را کاهش می‌دهد.</li>
+        </ol>
+
+        <h3>طراحی بهینهٔ توپولوژی</h3>
+
+        <p><span class="lr">PINN</span> می‌تواند:</p>
+        <ul>
+            <li>به‌عنوان حل‌کنندهٔ سریع تحلیل تنش در هر تکرار استفاده شود.</li>
+            <li>با تعریف پارامترهای طراحی به‌عنوان ورودی، بهینه‌سازی را در فضای پارامتری انجام دهد.</li>
+        </ul>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۷ -->
+        <!-- ========================================================== -->
+        <h2>مسیر پژوهشی و جمع‌بندی</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><strong>حوزه</strong></th>
+                    <th><strong>ایدهٔ اصلی</strong></th>
+                    <th><strong>ابزار عملی</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align: justify;">یادگیری عملگرها (<span class="lr">DeepONet</span>)</td>
+                    <td style="text-align: justify;">یادگیری نگاشت بین دو فضا</td>
+                    <td style="text-align: justify;">کد معماری <span class="lr">DeepONet</span></td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;">یادگیری عملگرها (<span class="lr">FNO</span>)</td>
+                    <td style="text-align: justify;">یادگیری در حوزهٔ فرکانس</td>
+                    <td style="text-align: justify;">(معرفی مفهومی)</td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;"><span class="lr">B-PINN</span> (عدم‌قطعیت)</td>
+                    <td style="text-align: justify;">توزیع احتمالی به‌جای پاسخ قطعی</td>
+                    <td style="text-align: justify;">کد <span class="lr">MC-Dropout</span></td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;"><span class="lr">PINN</span> در کنترل</td>
+                    <td style="text-align: justify;">حل <span class="lr">HJB</span> و <span class="lr">MPC</span> با <span class="lr">PINN</span></td>
+                    <td style="text-align: justify;">(مرور مفهومی)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>مسیر پیشنهادی برای پژوهشگران تازه‌کار:</strong></p>
+        <ol>
+            <li>با <span class="lr">DeepONet</span> شروع کنید (پیاده‌سازی ساده‌تر از <span class="lr">FNO</span>).</li>
+            <li>به <span class="lr">B-PINN</span> بروید (با <span class="lr">MC-Dropout</span>).</li>
+            <li>کاربرد در حوزهٔ خود را پیدا کنید.</li>
+        </ol>
+
+        <!-- ========================================================== -->
+        <!-- مراجع کلیدی -->
+        <!-- ========================================================== -->
+        <div class="reference">
+            <strong>مراجع کلیدی برای ادامهٔ مسیر</strong><br><br>
+            <span class="lr">Lu, L., Jin, P., Pang, G., Zhang, Z., &amp; Karniadakis, G. E. (2021). Learning nonlinear operators via DeepONet. <em>Nature Machine Intelligence</em>, 3(3), 218-229.</span><br><br>
+            <span class="lr">Li, Z., Kovachki, N., Azizzadenesheli, K., Liu, B., Bhattacharya, K., Stuart, A., &amp; Anandkumar, A. (2021). Fourier neural operator for parametric partial differential equations. <em>ICLR 2021</em>.</span><br><br>
+            <span class="lr">Yang, L., Meng, X., &amp; Karniadakis, G. E. (2021). B-PINNs: Bayesian physics-informed neural networks. <em>Journal of Computational Physics</em>, 425, 109913.</span><br><br>
+            <span class="lr">Karniadakis, G. E., Kevrekidis, I. G., Lu, L., Perdikaris, P., Wang, S., &amp; Yang, L. (2021). Physics-informed machine learning. <em>Nature Reviews Physics</em>, 3(6), 422-440.</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- سخن نهایی -->
+        <!-- ========================================================== -->
+        <div style="margin-top: 40px; padding: 25px 30px; background: #f5f7fa; border-radius: 8px; border-right: 6px solid #2c7a7b;">
+            <p style="font-size: 16px; line-height: 2.2; text-align: justify; text-indent: 0; margin-bottom: 0; color: #1a2a3a;">
+                <strong>سخن نهایی</strong><br><br>
+                دوست مهندس، شما اکنون به ابزاری مجهز شده‌اید که کمتر از یک دهه پیش، در مرز دانش بود. <span class="lr">PINN</span> یک تغییر پارادایم است که به شما می‌گوید برای حل مسائل مهندسی، نیازی به انتخاب بین «داده» و «فیزیک» نیست.
+                <br><br>
+                از شما دعوت می‌کنم این دانش را به‌کار بگیرید، آن را به چالش بکشید، و مرزهای آن را گسترش دهید. حوزهٔ حمل‌ونقل ریلی، با پیچیدگی‌های خود، یکی از بهترین بسترها برای به‌کارگیری <span class="lr">PINN</span> است.
+                <br><br>
+                <strong>موفق باشید! 🚀</strong>
+            </p>
+        </div>
+
+        <div style="margin-top: 30px; text-align: left; font-size: 14px; color: #4a5a6a; font-family: 'Noto Serif', serif;">
+            <strong>نویسنده</strong><br>
+            بهار ۱۴۰۴
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- پانویس -->
+        <!-- ========================================================== -->
+        <div class="footer-line">
+            — ۲۷۰ —
+        </div>
+
+    </div>
+
+</body>
+</html>

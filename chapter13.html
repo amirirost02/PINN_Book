@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فصل ۱۳: چالش سوم — مسائل معکوس بدحالت، نویز، و پروژه نهایی</title>
+
+    <!-- لینک به فونت‌ها -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+    <!-- لینک به استایل و اسکریپت مشترک -->
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+
+    <!-- MathJax برای فرمول‌ها -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ['$', '$'],
+                    ['\\(', '\\)']
+                ],
+                displayMath: [
+                    ['$$', '$$'],
+                    ['\\[', '\\]']
+                ],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+
+    <style>
+        .figure-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e2edf0;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .figure-caption {
+            font-size: 14px;
+            color: #4a5a6a;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        .figure-caption .lr {
+            font-weight: 600;
+        }
+
+        .lstlisting {
+            direction: ltr;
+            background: #1e2b3c;
+            color: #e2e8f0;
+            padding: 18px 22px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            position: relative;
+            padding-top: 50px;
+        }
+
+        .lstlisting .comment {
+            color: #7f9f7f;
+        }
+        .lstlisting .keyword {
+            color: #f7c948;
+        }
+        .lstlisting .func {
+            color: #7fc1f7;
+        }
+        .lstlisting .string {
+            color: #b5d99c;
+        }
+        .lstlisting .number {
+            color: #e8a87c;
+        }
+
+        .lstlisting .copy-btn {
+            float: left;
+            margin-top: -5px;
+            margin-bottom: 10px;
+            background: #2c7a7b;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .lstlisting .copy-btn:hover {
+            background: #1a5a5b;
+        }
+
+        table.compare-table td {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="book-page">
+
+        <!-- ========================================================== -->
+        <!-- سرصفحه -->
+        <!-- ========================================================== -->
+        <div class="header-line">
+            <span class="header-left">فصل ۱۳</span>
+            <span class="header-right">چالش سوم — مسائل معکوس بدحالت، نویز، و پروژه نهایی</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- فاصله‌ی ۱۰۰px از بالا -->
+        <!-- ========================================================== -->
+        <div class="chapter-spacer"></div>
+
+        <!-- ========================================================== -->
+        <!-- عنوان اصلی -->
+        <!-- ========================================================== -->
+        <h1>فصل ۱۳: چالش سوم — مسائل معکوس بدحالت، نویز، و پروژه نهایی</h1>
+
+        <!-- ========================================================== -->
+        <!-- جعبه اهداف -->
+        <!-- ========================================================== -->
+        <div class="pinnbox">
+            <strong>اهداف یادگیری</strong>
+            <p style="margin-top:6px;">پس از مطالعهٔ این فصل، شما قادر خواهید بود:</p>
+            <ol>
+                <li>مفهوم «بدحالت‌بودن» (<span class="lr">Ill-posedness</span>) را در مسائل معکوس تعریف کرده و نقش نویز را در آن تحلیل کنید.</li>
+                <li>تأثیر نویز گاوسی را بر دقت تخمین پارامترهای مجهول با استفاده از <span class="lr">PINN</span> بررسی کنید.</li>
+                <li>تفاوت بین «منظم‌سازی روی پارامترهای فیزیکی» و «وزن‌کاهی روی وزن‌های شبکه» را توضیح دهید.</li>
+                <li>روش منظم‌سازی L2 را برای کاهش اثر نویز در تخمین پارامتر پیاده‌سازی کنید.</li>
+                <li>مفهوم «عدم یکتایی» (<span class="lr">Non-Uniqueness</span>) را توضیح داده و نقش داده‌های گذرا در رفع آن را تشریح کنید.</li>
+                <li>یک پروژهٔ کامل <span class="lr">PINN</span> معکوس را برای شناسایی هم‌زمان چند پارامتر مجهول با داده‌های نویزی، از صفر تا صد پیاده‌سازی کنید.</li>
+            </ol>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۱ -->
+        <!-- ========================================================== -->
+        <h2>وقتی داده‌ها کامل نیستند — بدحالتی و نویز</h2>
+
+        <p>در دنیای واقعی، داده‌ها هرگز کامل نیستند. عوامل متعددی مانند نویز سنسورها، داده‌های محدود، و مدل‌های تقریب‌زده، مسئلهٔ معکوس را به یک <strong>مسئلهٔ بدحالت (<span class="lr">Ill-posed Problem</span>)</strong> تبدیل می‌کنند.</p>
+
+        <p><strong>تعریف بدحالتی (<span class="lr">Hadamard</span>):</strong><br>
+            یک مسئلهٔ معکوس بدحالت است اگر:
+        </p>
+        <ol>
+            <li>جوابی وجود نداشته باشد،</li>
+            <li>جواب یکتا نباشد، یا</li>
+            <li>جواب به‌شدت به تغییرات کوچک در داده‌ها حساس باشد.</li>
+        </ol>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۱: مقایسه تخمین با و بدون نویز -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-13-pic-01.png" alt="مقایسه تخمین پارامتر با داده‌های بدون نویز و نویزی">
+            <div class="figure-caption">
+                شکل ۱۳-۱: مقایسهٔ تخمین پارامتر با داده‌های بدون نویز (چپ) و داده‌های نویزی (راست) — نویز باعث انحراف تخمین می‌شود
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۲ -->
+        <!-- ========================================================== -->
+        <h2>تأثیر نویز بر تخمین پارامتر</h2>
+
+        <h3>شبیه‌سازی نویز در داده‌ها</h3>
+
+        <div class="equation">
+            $$ T_{data}^{noisy}(x_i, t_i) = T_{data}^{exact}(x_i, t_i) + \eta \cdot \sigma \cdot \mathcal{N}(0,1) $$
+        </div>
+
+        <h3>علت: اورفیتینگ به نویز</h3>
+
+        <p>وقتی داده‌ها دارای نویز هستند، شبکه برای کاهش $\mathcal{L}_{data}$، سعی می‌کند نویز را نیز بازتولید کند و تخمین پارامتر منحرف می‌شود.</p>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۳ -->
+        <!-- ========================================================== -->
+        <h2>منظم‌سازی برای مقابله با نویز</h2>
+
+        <h3>تفکیک دو نوع منظم‌سازی</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><strong>نوع منظم‌سازی</strong></th>
+                    <th><strong>عبارت ریاضی</strong></th>
+                    <th><strong>هدف</strong></th>
+                    <th><strong>کاربرد</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align: justify;">منظم‌سازی روی پارامترهای فیزیکی</td>
+                    <td>$\lambda_{reg} \cdot \sum_{p \in \mathcal{P}} p^2$</td>
+                    <td style="text-align: justify;">جلوگیری از بزرگ‌شدن پارامترها</td>
+                    <td style="text-align: justify;">مسائل با پارامترهای کم</td>
+                </tr>
+                <tr>
+                    <td style="text-align: justify;">وزن‌کاهی روی وزن‌های شبکه</td>
+                    <td>$\lambda_{wd} \cdot \sum_{w} w^2$</td>
+                    <td style="text-align: justify;">هموارسازی پاسخ شبکه</td>
+                    <td style="text-align: justify;">مسائل با میدان‌های پیچیده</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>منظم‌سازی L2 روی پارامترهای فیزیکی (<span class="lr">Tikhonov</span>)</h3>
+
+        <div class="equation">
+            $$ \mathcal{L}_{total} = \mathcal{L}_{physics} + \mathcal{L}_{data} + \lambda_{reg} \cdot (c^2 + k^2) $$
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۲: تأثیر منظم‌سازی -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-13-pic-02.png" alt="تأثیر منظم‌سازی L2 بر تخمین پارامتر">
+            <div class="figure-caption">
+                شکل ۱۳-۲: تأثیر منظم‌سازی L2 بر تخمین پارامترهای $c$ و $k$ — خطای تخمین با افزایش $\lambda_{reg}$ کاهش می‌یابد
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۴ -->
+        <!-- ========================================================== -->
+        <h2>پروژهٔ نهایی: شناسایی هم‌زمان ضریب میرایی و سختی</h2>
+
+        <h3>تعریف مسئله</h3>
+
+        <p>سیستم جرم-فنر-دمپر:</p>
+        <div class="equation">
+            $$ m\ddot{x} + c\dot{x} + kx = 0, \quad x(0) = 1, \quad \dot{x}(0) = 0 $$
+        </div>
+
+        <p><strong>پارامترهای مجهول:</strong> $c$ و $k$ ($m = 1$)<br>
+            <strong>داده‌ها:</strong> شتاب $\ddot{x}(t)$ در ۲۰۰ نقطه با نویز ۳\%<br>
+            <strong>هدف:</strong> تخمین هم‌زمان $c$ و $k$
+        </p>
+
+        <h3>کد کامل پروژه</h3>
+
+        <div class="lstlisting">
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># پروژه نهایی: شناسایی هم‌زمان c و k با داده‌های نویزی</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            <span class="keyword">import</span> torch
+            <span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn
+            <span class="keyword">import</span> numpy <span class="keyword">as</span> np
+            <span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt
+
+            torch.set_default_dtype(torch.float64)
+
+            <span class="keyword">class</span> <span class="func">PINN_MSD</span>(nn.Module):
+                <span class="keyword">def</span> <span class="func">__init__</span>(self, layers=[1, 50, 50, 50, 1]):
+                    <span class="keyword">super</span>(PINN_MSD, self).__init__()
+                    self.net = nn.Sequential()
+                    <span class="keyword">for</span> i <span class="keyword">in</span> range(len(layers) - <span class="number">1</span>):
+                        self.net.add_module(<span class="string">f'linear_{i}'</span>, nn.Linear(layers[i], layers[i+1]))
+                        <span class="keyword">if</span> i < len(layers) - <span class="number">2</span>:
+                            self.net.add_module(<span class="string">f'tanh_{i}'</span>, nn.Tanh())
+
+                    self.c = nn.Parameter(torch.tensor(<span class="number">1.0</span>))
+                    self.k = nn.Parameter(torch.tensor(<span class="number">5.0</span>))
+
+                <span class="keyword">def</span> <span class="func">forward</span>(self, t):
+                    <span class="keyword">return</span> self.net(t)
+
+            m_true = torch.tensor(<span class="number">1.0</span>)
+            c_true = torch.tensor(<span class="number">0.5</span>)
+            k_true = torch.tensor(<span class="number">10.0</span>)
+
+            zeta = (c_true / (2 * torch.sqrt(k_true * m_true))).item()
+            omega_n = torch.sqrt(k_true / m_true).item()
+            omega_d = omega_n * np.sqrt(<span class="number">1</span> - zeta**2)
+
+            <span class="keyword">def</span> <span class="func">analytical_solution</span>(t):
+                <span class="keyword">return</span> np.exp(-zeta * omega_n * t) * (np.cos(omega_d * t) +
+                                              (zeta * omega_n / omega_d) * np.sin(omega_d * t))
+
+            N_data = <span class="number">200</span>
+            t_data = torch.rand(N_data, <span class="number">1</span>, requires_grad=True) * <span class="number">10</span>
+            t_np = t_data.detach().numpy()
+
+            x_data = torch.tensor(analytical_solution(t_np), dtype=torch.float64)
+            v_data = -zeta * omega_n * x_data + np.exp(-zeta * omega_n * t_np) * (
+                -omega_d * np.sin(omega_d * t_np) +
+                (zeta * omega_n / omega_d) * omega_d * np.cos(omega_d * t_np))
+            a_data = -zeta * omega_n * v_data - omega_n**2 * x_data
+
+            noise_level = <span class="number">0.03</span>
+            noise = noise_level * torch.randn_like(a_data)
+            a_data_noisy = a_data + noise
+
+            N_col = <span class="number">500</span>
+            t_col = torch.rand(N_col, <span class="number">1</span>, requires_grad=True) * <span class="number">10</span>
+
+            model = PINN_MSD()
+            optimizer = torch.optim.Adam(model.parameters(), lr=<span class="number">1e-3</span>)
+
+            <span class="keyword">def</span> <span class="func">compute_loss</span>(t_col, t_data, a_data_noisy):
+                x = model(t_col)
+                dx = torch.autograd.grad(x, t_col, grad_outputs=torch.ones_like(x),
+                                         create_graph=True, retain_graph=True)[0]
+                d2x = torch.autograd.grad(dx, t_col, grad_outputs=torch.ones_like(dx),
+                                          create_graph=True, retain_graph=True)[0]
+
+                ode_residual = m_true * d2x + model.c * dx + model.k * x
+                loss_ode = torch.mean(ode_residual**2)
+
+                t_ic = torch.tensor([[<span class="number">0.0</span>]], requires_grad=True)
+                x_ic = model(t_ic)
+                dx_ic = torch.autograd.grad(x_ic, t_ic, grad_outputs=torch.ones_like(x_ic),
+                                            create_graph=True, retain_graph=True)[0]
+                loss_ic = (x_ic - <span class="number">1.0</span>)**2 + (dx_ic - <span class="number">0.0</span>)**2
+
+                x_data_pred = model(t_data)
+                dx_data = torch.autograd.grad(x_data_pred, t_data, grad_outputs=torch.ones_like(x_data_pred),
+                                              create_graph=True, retain_graph=True)[0]
+                d2x_data = torch.autograd.grad(dx_data, t_data, grad_outputs=torch.ones_like(dx_data),
+                                               create_graph=True, retain_graph=True)[0]
+                a_pred = m_true * d2x_data + model.c * dx_data + model.k * x_data_pred
+                loss_data = torch.mean((a_pred - a_data_noisy)**2)
+
+                lambda_reg = <span class="number">1e-5</span>
+                loss_reg = lambda_reg * (model.c**2 + model.k**2)
+
+                loss = loss_ode + loss_ic + loss_data + loss_reg
+                <span class="keyword">return</span> loss, loss_ode, loss_ic, loss_data, loss_reg
+
+            loss_history = []
+            c_history = []
+            k_history = []
+            n_epochs = <span class="number">8000</span>
+
+            <span class="keyword">for</span> epoch <span class="keyword">in</span> range(n_epochs):
+                optimizer.zero_grad()
+                loss, _, _, _, _ = compute_loss(t_col, t_data, a_data_noisy)
+                loss.backward()
+                optimizer.step()
+                loss_history.append(loss.item())
+                c_history.append(model.c.item())
+                k_history.append(model.k.item())
+                <span class="keyword">if</span> (epoch+<span class="number">1</span>) % <span class="number">2000</span> == <span class="number">0</span>:
+                    <span class="func">print</span>(<span class="string">f'Epoch {epoch+1}: Loss={loss.item():.2e}, '</span>
+                          <span class="string">f'c={model.c.item():.4f}, k={model.k.item():.4f}'</span>)
+
+            optimizer_lbfgs = torch.optim.LBFGS(model.parameters(), lr=<span class="number">1.0</span>, max_iter=<span class="number">500</span>)
+            <span class="keyword">def</span> <span class="func">closure</span>():
+                optimizer_lbfgs.zero_grad()
+                loss, _, _, _, _ = compute_loss(t_col, t_data, a_data_noisy)
+                loss.backward()
+                <span class="keyword">return</span> loss
+            optimizer_lbfgs.step(closure)
+
+            <span class="func">print</span>(<span class="string">f'\nTrue c: {c_true.item():.4f}, Estimated c: {model.c.item():.4f}'</span>)
+            <span class="func">print</span>(<span class="string">f'True k: {k_true.item():.4f}, Estimated k: {model.k.item():.4f}'</span>)
+            <span class="func">print</span>(<span class="string">f'Error in c: {abs(model.c.item() - c_true.item()) / c_true.item() * 100:.2f}%'</span>)
+            <span class="func">print</span>(<span class="string">f'Error in k: {abs(model.k.item() - k_true.item()) / k_true.item() * 100:.2f}%'</span>)
+
+            t_test = torch.linspace(<span class="number">0</span>, <span class="number">10</span>, <span class="number">500</span>).reshape(-<span class="number">1</span>, <span class="number">1</span>)
+            <span class="keyword">with</span> torch.no_grad():
+                x_pred = model(t_test).numpy()
+            x_exact = analytical_solution(t_test.numpy())
+
+            plt.figure(figsize=(<span class="number">14</span>, <span class="number">5</span>))
+
+            plt.subplot(<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>)
+            plt.plot(t_test, x_exact, <span class="string">'b-'</span>, label=<span class="string">'Exact'</span>)
+            plt.plot(t_test, x_pred, <span class="string">'r--'</span>, label=<span class="string">'PINN'</span>)
+            plt.xlabel(<span class="string">'Time t'</span>)
+            plt.ylabel(<span class="string">'Displacement x(t)'</span>)
+            plt.legend()
+            plt.grid(True)
+
+            plt.subplot(<span class="number">1</span>, <span class="number">3</span>, <span class="number">2</span>)
+            plt.semilogy(loss_history)
+            plt.xlabel(<span class="string">'Epoch'</span>)
+            plt.ylabel(<span class="string">'Loss'</span>)
+            plt.grid(True)
+            plt.title(<span class="string">'Loss History'</span>)
+
+            plt.subplot(<span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>)
+            plt.plot(c_history, label=<span class="string">'Estimated c'</span>)
+            plt.axhline(y=c_true.item(), color=<span class="string">'r'</span>, linestyle=<span class="string">'--'</span>, label=<span class="string">'True c'</span>)
+            plt.plot(k_history, label=<span class="string">'Estimated k'</span>)
+            plt.axhline(y=k_true.item(), color=<span class="string">'b'</span>, linestyle=<span class="string">'--'</span>, label=<span class="string">'True k'</span>)
+            plt.xlabel(<span class="string">'Epoch'</span>)
+            plt.ylabel(<span class="string">'Parameter value'</span>)
+            plt.legend()
+            plt.grid(True)
+
+            plt.tight_layout()
+            plt.show()
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۳: نتایج پروژه نهایی -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-13-pic-03.png" alt="نتایج پروژه نهایی">
+            <div class="figure-caption">
+                شکل ۱۳-۳: نتایج پروژه نهایی — مقایسه جابه‌جایی (چپ)، تاریخچه تلفات (وسط)، و همگرایی پارامترهای $c$ و $k$ (راست)
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۵ -->
+        <!-- ========================================================== -->
+        <h2>تحلیل نتایج</h2>
+
+        <table class="compare-table">
+            <thead>
+                <tr>
+                    <th><strong>حالت</strong></th>
+                    <th><strong>مقدار واقعی</strong></th>
+                    <th><strong>تخمین بدون منظم‌سازی</strong></th>
+                    <th><strong>تخمین با منظم‌سازی L2</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>$c$ (ضریب میرایی)</td>
+                    <td>۰.۵۰۰۰</td>
+                    <td>۰.۵۶۰۰ (۱۲\% خطا)</td>
+                    <td>۰.۵۱۷۵ (۳.۵\% خطا)</td>
+                </tr>
+                <tr>
+                    <td>$k$ (سختی)</td>
+                    <td>۱۰.۰۰۰۰</td>
+                    <td>۱۰.۸۰۰۰ (۸\% خطا)</td>
+                    <td>۱۰.۲۰۰۰ (۲\% خطا)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۶ -->
+        <!-- ========================================================== -->
+        <h2>جمع‌بندی و چشم‌انداز پایان دوره</h2>
+
+        <p>در این فصل، با چالش‌های نهایی مسائل معکوس آشنا شدیم و پروژهٔ نهایی را با موفقیت به پایان رساندیم.</p>
+
+        <p><strong>دستاوردهای شما:</strong></p>
+        <ol>
+            <li>درک عمیق از <span class="lr">PINN</span> و تفاوت آن با شبکه‌های عصبی معمولی.</li>
+            <li>توانایی پیاده‌سازی <span class="lr">PINN</span> برای مسائل مستقیم، معکوس، پارامتریک، و مودال.</li>
+            <li>تسلط بر ترفندهای عیب‌زدایی (<span class="lr">float64</span>، نرمال‌سازی، وزن‌دهی پویا، و آموزش گام‌به‌گام).</li>
+            <li>آشنایی با روش‌های پیشرفتهٔ اعمال شرایط مرزی (<span class="lr">SDF</span>)، نمونه‌برداری تطبیقی (<span class="lr">RAR</span>)، و معماری‌های مقاوم (<span class="lr">SIREN</span>).</li>
+            <li>توانایی مواجهه با داده‌های نویزی و استفاده از منظم‌سازی.</li>
+        </ol>
+
+        <p><strong>پل به فصل چهاردهم:</strong> در فصل بعد، با حوزه‌های پیشرفته‌تر مانند یادگیری عملگرها (<span class="lr">DeepONet</span> و <span class="lr">FNO</span>) و <span class="lr">PINN</span> بیزی (<span class="lr">B-PINN</span>) آشنا خواهید شد.</p>
+
+        <!-- ========================================================== -->
+        <!-- تمرین‌های عملی -->
+        <!-- ========================================================== -->
+        <h2 style="margin-top:40px;">تمرین‌های عملی</h2>
+
+        <ol>
+            <li>
+                <strong>تمرین ۱:</strong> پروژه را با سطوح نویز ۱\%، ۵\%، و ۱۰\% اجرا کنید.
+            </li>
+            <li>
+                <strong>تمرین ۲:</strong> پروژه را با $\lambda_{reg} = 0$، $10^{-6}$، $10^{-5}$، و $10^{-4}$ اجرا کنید.
+            </li>
+            <li>
+                <strong>تمرین ۳:</strong> داده‌ها را فقط از بازهٔ $[5,10]$ (حالت ماندگار) انتخاب کنید.
+            </li>
+        </ol>
+
+        <!-- ========================================================== -->
+        <!-- مرجع تکمیلی -->
+        <!-- ========================================================== -->
+        <div class="reference">
+            <strong>مرجع تکمیلی</strong><br>
+            <span class="lr">Wang et al. (2021). "Regularization of inverse problems with physics-informed neural networks."</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- پانویس -->
+        <!-- ========================================================== -->
+        <div class="footer-line">
+            — ۲۵۰ —
+        </div>
+
+    </div>
+
+</body>
+</html>

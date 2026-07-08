@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فصل ۵: ورود به PDE — حل معادله‌ی انتقال حرارت یک‌بعدی</title>
+
+    <!-- لینک به فونت‌ها -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+    <!-- لینک به استایل و اسکریپت مشترک -->
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+
+    <!-- MathJax برای فرمول‌ها -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ['$', '$'],
+                    ['\\(', '\\)']
+                ],
+                displayMath: [
+                    ['$$', '$$'],
+                    ['\\[', '\\]']
+                ],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+
+    <style>
+        /* ---------- استایل اضافه برای عکس‌ها ---------- */
+        .figure-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e2edf0;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .figure-caption {
+            font-size: 14px;
+            color: #4a5a6a;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        .figure-caption .lr {
+            font-weight: 600;
+        }
+
+        /* ---------- استایل بلوک کد پایتون ---------- */
+        .codeblock {
+            direction: ltr;
+            background: #1e2b3c;
+            color: #e2e8f0;
+            padding: 18px 22px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            position: relative;
+            padding-top: 50px;
+        }
+
+        .codeblock .comment {
+            color: #7f9f7f;
+        }
+        .codeblock .keyword {
+            color: #f7c948;
+        }
+        .codeblock .func {
+            color: #7fc1f7;
+        }
+        .codeblock .string {
+            color: #b5d99c;
+        }
+        .codeblock .number {
+            color: #e8a87c;
+        }
+
+        .codeblock .copy-btn {
+            float: left;
+            margin-top: -5px;
+            margin-bottom: 10px;
+            background: #2c7a7b;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .codeblock .copy-btn:hover {
+            background: #1a5a5b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="book-page">
+
+        <!-- ========================================================== -->
+        <!-- سرصفحه (نام فصل) -->
+        <!-- ========================================================== -->
+        <div class="header-line">
+            <span class="header-left">فصل ۵</span>
+            <span class="header-right">ورود به <span class="lr">PDE</span> — حل معادله‌ی انتقال حرارت یک‌بعدی</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- فاصله‌ی ۱۰۰px از بالا -->
+        <!-- ========================================================== -->
+        <div class="chapter-spacer"></div>
+
+        <!-- ========================================================== -->
+        <!-- عنوان اصلی فصل -->
+        <!-- ========================================================== -->
+        <h1>فصل ۵: ورود به <span class="lr">PDE</span> — حل معادله‌ی انتقال حرارت یک‌بعدی</h1>
+
+        <!-- ========================================================== -->
+        <!-- جعبه اهداف -->
+        <!-- ========================================================== -->
+        <div class="pinnbox">
+            <strong>اهداف یادگیری</strong>
+            <p style="margin-top:6px;">پس از مطالعهٔ این فصل، شما قادر خواهید بود:</p>
+            <ol>
+                <li>یک <span class="lr">PINN</span> را برای حل یک معادلهٔ دیفرانسیل با مشتقات جزئی (<span class="lr">PDE</span>) ساده تنظیم کنید.</li>
+                <li>مشتقات جزئی مرتبهٔ اول و دوم را با استفاده از <span class="lr">torch.autograd.grad</span> محاسبه نمایید.</li>
+                <li>تغییرات لازم در بلوک سوم (تابع هزینه) را برای تبدیل مسئله از <span class="lr">ODE</span> به <span class="lr">PDE</span> اعمال کنید.</li>
+                <li>تأثیر اضافه‌شدن یک بُعد مکانی به ورودی شبکه را بر معماری و فرآیند آموزش تحلیل کنید.</li>
+                <li>یک مسئلهٔ انتقال حرارت یک‌بعدی را با شرایط مرزی دیریکله و شرط اولیهٔ سینوسی، با استفاده از <span class="lr">PINN</span> حل کرده و نتیجه را با جواب تحلیلی مقایسه نمایید.</li>
+            </ol>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۱ -->
+        <!-- ========================================================== -->
+        <h2>از <span class="lr">ODE</span> تا <span class="lr">PDE</span>: گامی به سوی مسائل واقعی‌تر</h2>
+
+        <p>در فصل چهارم، با موفقیت یک معادلهٔ دیفرانسیل معمولی (<span class="lr">ODE</span>) را با استفاده از <span class="lr">PINN</span> حل کردیم. در آن مسئله، متغیر وابسته (<span class="lr">u</span>) تنها به یک متغیر مستقل (زمان <span class="lr">t</span>) وابسته بود. اما در دنیای واقعی مهندسی — به‌ویژه در حوزهٔ ارتعاشات، آکوستیک و حتی مدیریت حرارتی سیستم‌های ریلی — اکثر پدیده‌ها به بیش از یک متغیر مستقل وابسته هستند.</p>
+
+        <p>برای مثال، <strong>توزیع دما در یاتاقان‌های یک واگن قطار</strong> به مکان (<span class="lr">x</span>) و زمان (<span class="lr">t</span>) بستگی دارد. به همین ترتیب، تغییرمکان یک تیر راه‌آهن تحت بارگذاری متحرک، تابعی از مکان و زمان است. این پدیده‌ها با <strong>معادلات با مشتقات جزئی (<span class="lr">PDE</span>)</strong> توصیف می‌شوند.</p>
+
+        <p>در این فصل، با انتخاب <strong>معادلهٔ انتقال حرارت یک‌بعدی</strong>، اولین گام را به سوی مسائل <span class="lr">PDE</span> برمی‌داریم. این معادله، یک مدل کلاسیک برای توصیف پخش دما در یک میلهٔ یک‌بعدی است و به‌خاطر وجود جواب تحلیلی، امکان مقایسهٔ دقیق عملکرد <span class="lr">PINN</span> را فراهم می‌کند.</p>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۲ -->
+        <!-- ========================================================== -->
+        <h2>معرفی مسئله: معادلهٔ انتقال حرارت یک‌بعدی (مدلی برای خنک‌کاری)</h2>
+
+        <p>مسئلهٔ زیر را در نظر بگیرید که می‌تواند مدل ساده‌شده‌ای برای <strong>خنک‌شدن یک قطعهٔ فلزی (مثلاً یاتاقان یا دیسک ترمز در سیستم ریلی)</strong> باشد:</p>
+
+        <div class="equation">
+            $$ \frac{\partial T}{\partial t} = \alpha \frac{\partial^2 T}{\partial x^2}, \quad (x,t) \in [0,1] \times [0,1] $$
+        </div>
+
+        <p><strong>شرایط مرزی (دیریکله):</strong></p>
+        <div class="equation">
+            $$ T(0,t) = 0, \quad T(1,t) = 0 $$
+        </div>
+
+        <p><strong>شرط اولیه:</strong></p>
+        <div class="equation">
+            $$ T(x,0) = \sin(\pi x) $$
+        </div>
+
+        <p><strong>پارامتر فیزیکی:</strong></p>
+        <div class="equation">
+            $$ \alpha = 0.01 \quad (\text{ضریب نفوذ حرارتی}) $$
+        </div>
+
+        <p><strong>جواب تحلیلی (با استفاده از روش جداسازی متغیرها):</strong></p>
+        <div class="equation">
+            $$ T(x,t) = \sin(\pi x) \cdot \exp(-\alpha \pi^2 t) $$
+        </div>
+
+        <p><strong>تفسیر فیزیکی:</strong> یک میلهٔ فلزی به طول ۱ متر را در نظر بگیرید. دمای اولیه در طول میله به‌صورت سینوسی توزیع شده است (گرم‌ترین نقطه در وسط میله). دو سر میله در دمای صفر درجه نگه داشته می‌شوند (تماس با محیط خنک). با گذشت زمان، دما در سراسر میله به‌صورت نمایی کاهش می‌یابد تا به صفر برسد.</p>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۳ -->
+        <!-- ========================================================== -->
+        <h2>ساختار ۵ بلوکی کد (تغییرات نسبت به فصل چهارم)</h2>
+
+        <p>همان‌طور که در فصل چهارم تأکید شد، <strong>الگوی ۵ بلوکی</strong> در <span class="lr">PINN</span> ثابت است. برای حل مسائل جدید، <strong>فقط بلوک سوم (تابع هزینه)</strong> و بخش‌های کوچکی از بلوک دوم (تولید نقاط دو بعدی) تغییر می‌کنند.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><strong>بلوک</strong></th>
+                    <th><strong>فصل چهارم (<span class="lr">ODE</span>)</strong></th>
+                    <th><strong>این فصل (<span class="lr">PDE</span> - انتقال حرارت)</strong></th>
+                    <th><strong>نوع تغییر</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>بلوک ۱ (شبکه)</td>
+                    <td>ورودی: ۱ (<span class="lr">t</span>)</td>
+                    <td>ورودی: ۲ (<span class="lr">x, t</span>)</td>
+                    <td><strong>تغییر</strong> (ابعاد ورودی)</td>
+                </tr>
+                <tr>
+                    <td>بلوک ۲ (نقاط)</td>
+                    <td>نقاط کالوکیشن: (<span class="lr">t</span>)</td>
+                    <td>نقاط کالوکیشن: (<span class="lr">x, t</span>) در مستطیل [0,1]×[0,1]</td>
+                    <td><strong>تغییر</strong> (تولید نقاط دو بعدی)</td>
+                </tr>
+                <tr>
+                    <td>بلوک ۳ (تلفات)</td>
+                    <td>$\frac{du}{dt} + u$</td>
+                    <td>$\frac{\partial T}{\partial t} - \alpha \frac{\partial^2 T}{\partial x^2}$ + شرایط مرزی + شرط اولیه</td>
+                    <td><strong>تغییر</strong> (مهم‌ترین تغییر)</td>
+                </tr>
+                <tr>
+                    <td>بلوک ۴ (آموزش)</td>
+                    <td><span class="lr">Adam</span> → <span class="lr">L-BFGS</span></td>
+                    <td><span class="lr">Adam</span> → <span class="lr">L-BFGS</span></td>
+                    <td><strong>ثابت</strong></td>
+                </tr>
+                <tr>
+                    <td>بلوک ۵ (ارزیابی)</td>
+                    <td>مقایسه با $e^{-t}$</td>
+                    <td>مقایسه با $\sin(\pi x) \cdot \exp(-\alpha \pi^2 t)$</td>
+                    <td><strong>تغییر</strong> (جواب تحلیلی جدید)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۴ -->
+        <!-- ========================================================== -->
+        <h2>کد کامل <span class="lr">PINN</span> برای معادلهٔ انتقال حرارت یک‌بعدی</h2>
+
+        <div class="codeblock">
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۱: تعریف شبکه‌ی عصبی (ورودی ۲ بعدی)</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            <span class="keyword">import</span> torch
+            <span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn
+            <span class="keyword">import</span> numpy <span class="keyword">as</span> np
+            <span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt
+
+            <span class="keyword">class</span> <span class="func">PINN_Heat</span>(nn.Module):
+                <span class="string">"""شبکه‌ی عصبی برای حل معادله‌ی انتقال حرارت یک‌بعدی"""</span>
+                <span class="keyword">def</span> <span class="func">__init__</span>(self, layers=[2, 50, 50, 50, 50, 1]):
+                    <span class="keyword">super</span>(PINN_Heat, self).__init__()
+                    self.net = nn.Sequential()
+                    <span class="keyword">for</span> i <span class="keyword">in</span> range(len(layers) - 1):
+                        self.net.add_module(<span class="string">f'linear_{i}'</span>, nn.Linear(layers[i], layers[i+1]))
+                        <span class="keyword">if</span> i < len(layers) - 2:
+                            self.net.add_module(<span class="string">f'tanh_{i}'</span>, nn.Tanh())
+
+                <span class="keyword">def</span> <span class="func">forward</span>(self, x, t):
+                    inputs = torch.cat([x, t], dim=1)
+                    <span class="keyword">return</span> self.net(inputs)
+
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۲: تولید نقاط کالوکیشن و نقاط داده (دامنه‌ی دو بعدی)</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            alpha = <span class="number">0.01</span>
+            L, T = <span class="number">1.0</span>, <span class="number">1.0</span>
+            N_col = <span class="number">5000</span>
+            N_boundary = <span class="number">200</span>
+            N_ic = <span class="number">200</span>
+
+            x_col = torch.rand(N_col, <span class="number">1</span>, requires_grad=True) * L
+            t_col = torch.rand(N_col, <span class="number">1</span>, requires_grad=True) * T
+
+            t_boundary = torch.rand(N_boundary, <span class="number">1</span>) * T
+            x_0 = torch.zeros(N_boundary, <span class="number">1</span>)
+            x_1 = torch.ones(N_boundary, <span class="number">1</span>)
+
+            x_ic = torch.rand(N_ic, <span class="number">1</span>) * L
+            t_0 = torch.zeros(N_ic, <span class="number">1</span>)
+            T_ic_true = torch.sin(np.pi * x_ic)
+
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۳: تعریف تابع هزینه (تغییر اصلی)</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            model = PINN_Heat()
+            optimizer = torch.optim.Adam(model.parameters(), lr=<span class="number">1e-3</span>)
+
+            <span class="keyword">def</span> <span class="func">compute_loss</span>():
+                T_pred = model(x_col, t_col)
+
+                T_t = torch.autograd.grad(
+                    T_pred, t_col,
+                    grad_outputs=torch.ones_like(T_pred),
+                    create_graph=True,
+                    retain_graph=True
+                )[0]
+
+                T_x = torch.autograd.grad(
+                    T_pred, x_col,
+                    grad_outputs=torch.ones_like(T_pred),
+                    create_graph=True,
+                    retain_graph=True
+                )[0]
+
+                T_xx = torch.autograd.grad(
+                    T_x, x_col,
+                    grad_outputs=torch.ones_like(T_x),
+                    create_graph=True,
+                    retain_graph=True
+                )[0]
+
+                residual = T_t - alpha * T_xx
+                loss_physics = torch.mean(residual**2)
+
+                T_bc0 = model(x_0, t_boundary)
+                loss_bc0 = torch.mean((T_bc0 - <span class="number">0.0</span>)**2)
+
+                T_bc1 = model(x_1, t_boundary)
+                loss_bc1 = torch.mean((T_bc1 - <span class="number">0.0</span>)**2)
+
+                T_ic_pred = model(x_ic, t_0)
+                loss_ic = torch.mean((T_ic_pred - T_ic_true)**2)
+
+                loss = loss_physics + loss_bc0 + loss_bc1 + loss_ic
+                <span class="keyword">return</span> loss, loss_physics, loss_bc0, loss_bc1, loss_ic
+
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۴: حلقه‌ی آموزش (بدون تغییر)</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            loss_history = []
+            n_epochs_adam = <span class="number">10000</span>
+
+            <span class="keyword">for</span> epoch <span class="keyword">in</span> range(n_epochs_adam):
+                optimizer.zero_grad()
+                loss, _, _, _, _ = compute_loss()
+                loss.backward()
+                optimizer.step()
+                loss_history.append(loss.item())
+                <span class="keyword">if</span> (epoch + <span class="number">1</span>) % <span class="number">2000</span> == <span class="number">0</span>:
+                    <span class="func">print</span>(<span class="string">f'Epoch {epoch+1}/{n_epochs_adam}, Loss: {loss.item():.2e}'</span>)
+
+            optimizer_lbfgs = torch.optim.LBFGS(model.parameters(), lr=<span class="number">1.0</span>, max_iter=<span class="number">500</span>)
+
+            <span class="keyword">def</span> <span class="func">closure</span>():
+                optimizer_lbfgs.zero_grad()
+                loss, _, _, _, _ = compute_loss()
+                loss.backward()
+                <span class="keyword">return</span> loss
+
+            optimizer_lbfgs.step(closure)
+
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۵: ارزیابی و رسم نتایج</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            x_test = torch.linspace(<span class="number">0</span>, L, <span class="number">100</span>).reshape(-<span class="number">1</span>, <span class="number">1</span>)
+            t_test = torch.linspace(<span class="number">0</span>, T, <span class="number">100</span>).reshape(-<span class="number">1</span>, <span class="number">1</span>)
+            X, T_grid = torch.meshgrid(x_test.squeeze(), t_test.squeeze(), indexing='ij')
+            x_flat = X.reshape(-<span class="number">1</span>, <span class="number">1</span>)
+            t_flat = T_grid.reshape(-<span class="number">1</span>, <span class="number">1</span>)
+
+            <span class="keyword">with</span> torch.no_grad():
+                T_pred_flat = model(x_flat, t_flat).numpy()
+                T_pred = T_pred_flat.reshape(X.shape)
+
+            T_exact = np.sin(np.pi * X.numpy()) * np.exp(-alpha * np.pi**2 * T_grid.numpy())
+
+            error_l2 = np.linalg.norm(T_pred - T_exact) / np.linalg.norm(T_exact)
+            <span class="func">print</span>(<span class="string">f'L2 Error: {error_l2:.2e}'</span>)
+
+            fig, axes = plt.subplots(<span class="number">2</span>, <span class="number">2</span>, figsize=(<span class="number">14</span>, <span class="number">10</span>))
+
+            im1 = axes[<span class="number">0</span>, <span class="number">0</span>].contourf(T_grid, X, T_exact, levels=<span class="number">50</span>, cmap='hot')
+            axes[<span class="number">0</span>, <span class="number">0</span>].set_xlabel(<span class="string">'Time t'</span>, fontsize=<span class="number">12</span>)
+            axes[<span class="number">0</span>, <span class="number">0</span>].set_ylabel(<span class="string">'Position x'</span>, fontsize=<span class="number">12</span>)
+            axes[<span class="number">0</span>, <span class="number">0</span>].set_title(<span class="string">'Analytical Solution'</span>, fontsize=<span class="number">14</span>)
+            plt.colorbar(im1, ax=axes[<span class="number">0</span>, <span class="number">0</span>])
+
+            im2 = axes[<span class="number">0</span>, <span class="number">1</span>].contourf(T_grid, X, T_pred, levels=<span class="number">50</span>, cmap='hot')
+            axes[<span class="number">0</span>, <span class="number">1</span>].set_xlabel(<span class="string">'Time t'</span>, fontsize=<span class="number">12</span>)
+            axes[<span class="number">0</span>, <span class="number">1</span>].set_ylabel(<span class="string">'Position x'</span>, fontsize=<span class="number">12</span>)
+            axes[<span class="number">0</span>, <span class="number">1</span>].set_title(<span class="string">'PINN Prediction'</span>, fontsize=<span class="number">14</span>)
+            plt.colorbar(im2, ax=axes[<span class="number">0</span>, <span class="number">1</span>])
+
+            im3 = axes[<span class="number">1</span>, <span class="number">0</span>].contourf(T_grid, X, np.abs(T_pred - T_exact), levels=<span class="number">50</span>, cmap='coolwarm')
+            axes[<span class="number">1</span>, <span class="number">0</span>].set_xlabel(<span class="string">'Time t'</span>, fontsize=<span class="number">12</span>)
+            axes[<span class="number">1</span>, <span class="number">0</span>].set_ylabel(<span class="string">'Position x'</span>, fontsize=<span class="number">12</span>)
+            axes[<span class="number">1</span>, <span class="number">0</span>].set_title(<span class="string">'Absolute Error'</span>, fontsize=<span class="number">14</span>)
+            plt.colorbar(im3, ax=axes[<span class="number">1</span>, <span class="number">0</span>])
+
+            axes[<span class="number">1</span>, <span class="number">1</span>].semilogy(loss_history)
+            axes[<span class="number">1</span>, <span class="number">1</span>].set_xlabel(<span class="string">'Epoch'</span>, fontsize=<span class="number">12</span>)
+            axes[<span class="number">1</span>, <span class="number">1</span>].set_ylabel(<span class="string">'Loss'</span>, fontsize=<span class="number">12</span>)
+            axes[<span class="number">1</span>, <span class="number">1</span>].set_title(<span class="string">'Training Loss History'</span>, fontsize=<span class="number">14</span>)
+            axes[<span class="number">1</span>, <span class="number">1</span>].grid(True, alpha=<span class="number">0.3</span>)
+
+            plt.tight_layout()
+            plt.show()
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۵: تشریح تغییرات کلیدی -->
+        <!-- ========================================================== -->
+        <h2>تشریح تغییرات کلیدی در کد</h2>
+
+        <h3>افزایش ابعاد ورودی شبکه (بلوک ۱)</h3>
+        <p>در این مسئله، شبکه باید دو ورودی (مکان <span class="lr">$x$</span> و زمان <span class="lr">$t$</span>) را دریافت کند. بنابراین، لایهٔ اول شبکه با <span class="lr">2</span> نورون شروع می‌شود: <span class="lr">layers=[2, 50, 50, 50, 50, 1]</span>.</p>
+
+        <h3>تولید نقاط کالوکیشن و نقاط داده (بلوک ۲)</h3>
+        <p>بر خلاف فصل چهارم که نقاط کالوکیشن فقط روی محور زمان تولید می‌شدند، در اینجا نقاط باید کل مستطیل <span class="lr">$[0,1] \times [0,1]$</span> را پوشش دهند. نقاط مرزی و شرط اولیه (<strong>نقاط داده</strong>) فقط برای ارزیابی خروجی شبکه استفاده می‌شوند و نیازی به مشتق‌گیری ندارند.</p>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۱: جواب تحلیلی و خطا -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-05-pic-01.png" alt="مقایسه جواب تحلیلی، پیش‌بینی PINN و خطا">
+            <div class="figure-caption">
+                شکل ۵-۱: مقایسهٔ جواب تحلیلی (چپ)، پیش‌بینی <span class="lr">PINN</span> (وسط)، و خطای مطلق (راست) برای معادلهٔ انتقال حرارت
+            </div>
+        </div>
+
+        <h3>محاسبهٔ مشتقات جزئی (بلوک ۳)</h3>
+        <p>در این مسئله، به سه مشتق نیاز داریم: (۱) مشتق اول نسبت به زمان <span class="lr">($\partial T/\partial t$)</span>، (۲) مشتق اول نسبت به مکان <span class="lr">($\partial T/\partial x$)</span>، و (۳) مشتق دوم نسبت به مکان <span class="lr">($\partial^2 T/\partial x^2$)</span>.</p>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۲: تاریخچه تلفات -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-05-pic-02.png" alt="تاریخچه تلفات در طول آموزش">
+            <div class="figure-caption">
+                شکل ۵-۲: تاریخچهٔ تلفات (<span class="lr">Loss</span>) در طول آموزش — همگرایی با استفاده از <span class="lr">Adam</span> و <span class="lr">L-BFGS</span>
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- جمع‌بندی -->
+        <!-- ========================================================== -->
+        <h2>جمع‌بندی و مسیر پیش‌رو</h2>
+
+        <p>در این فصل، گام مهمی از <span class="lr">ODE</span> به <span class="lr">PDE</span> برداشتیم. نکات کلیدی عبارت‌اند از:</p>
+
+        <ol>
+            <li><strong>افزایش ابعاد ورودی:</strong> با افزایش تعداد متغیرهای مستقل، ورودی شبکه از (<span class="lr">$t$</span>) به (<span class="lr">$x, t$</span>) تغییر کرد.</li>
+            <li><strong>محاسبهٔ مشتقات جزئی:</strong> با استفاده از <span class="lr">torch.autograd.grad</span> و تنظیم <span class="lr">create_graph=True</span>، مشتقات جزئی مرتبهٔ اول و دوم محاسبه می‌شوند.</li>
+            <li><strong>تفکیک نقاط کالوکیشن و نقاط داده:</strong> نقاط کالوکیشن برای محاسبهٔ معادله و نقاط داده برای اعمال شرایط مرزی/اولیه به‌کار می‌روند.</li>
+            <li><strong>ثبات الگوی ۵ بلوکی:</strong> ساختار کلی کد بدون تغییر باقی ماند و تنها بلوک سوم تغییر کرد.</li>
+        </ol>
+
+        <p><strong>پل به فصل ششم:</strong> در این فصل، مسئلهٔ مستقیم (<span class="lr">Forward</span>) را حل کردیم. در فصل بعد، وارد حوزهٔ <strong>مسائل معکوس</strong> خواهیم شد و نشان خواهیم داد که چگونه می‌توان ضریب نفوذ حرارتی مجهول را با استفاده از داده‌های پراکنده تخمین زد.</p>
+
+        <!-- ========================================================== -->
+        <!-- تمرین‌های عملی -->
+        <!-- ========================================================== -->
+        <h2 style="margin-top:40px;">تمرین‌های عملی</h2>
+
+        <ol>
+            <li>
+                <strong>تمرین ۱ (تغییر شرط مرزی به نیومن):</strong> شرایط مرزی مسئله را از نوع دیریکله ($T=0$) به نوع نیومن ($\partial T/\partial x = 0$) در دو سر میله تغییر دهید. تابع هزینه را اصلاح کنید.
+            </li>
+            <li>
+                <strong>تمرین ۲ (تحلیل حساسیت به تعداد نقاط کالوکیشن):</strong> کد را با تعداد نقاط کالوکیشن $N_{col} = 1000$ و $N_{col} = 10000$ اجرا کنید و خطای L2 را مقایسه کنید.
+            </li>
+            <li>
+                <strong>تمرین ۳ (مسئلهٔ گرمای با چشمه):</strong> معادلهٔ انتقال حرارت با چشمهٔ حرارتی ثابت $\frac{\partial T}{\partial t} = \alpha \frac{\partial^2 T}{\partial x^2} + Q$ را با $Q=1$ حل کنید.
+            </li>
+        </ol>
+
+        <!-- ========================================================== -->
+        <!-- مرجع تکمیلی -->
+        <!-- ========================================================== -->
+        <div class="reference">
+            <strong>مرجع تکمیلی</strong><br>
+            <span class="lr">Raissi et al. (2019)</span> بخش‌های ۳ و ۴. همچنین کتاب <span class="lr">Heat Transfer</span> نوشتهٔ <span class="lr">Incropera &amp; DeWitt</span>.
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- پانویس (شماره صفحه) -->
+        <!-- ========================================================== -->
+        <div class="footer-line">
+            — ۸۹ —
+        </div>
+
+    </div>
+
+</body>
+</html>

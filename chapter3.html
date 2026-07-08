@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فصل ۳: ساختار دقیق PINN و ریاضیات تابع هزینه</title>
+
+    <!-- لینک به فونت‌ها -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+    <!-- لینک به استایل و اسکریپت مشترک -->
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+
+    <!-- MathJax برای فرمول‌ها -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ['$', '$'],
+                    ['\\(', '\\)']
+                ],
+                displayMath: [
+                    ['$$', '$$'],
+                    ['\\[', '\\]']
+                ],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+
+    <style>
+        /* ---------- استایل اضافه برای عکس‌ها ---------- */
+        .figure-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e2edf0;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .figure-caption {
+            font-size: 14px;
+            color: #4a5a6a;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        .figure-caption .lr {
+            font-weight: 600;
+        }
+
+        /* ---------- استایل بلوک کد پایتون ---------- */
+        .lstlisting {
+            direction: ltr;
+            background: #1e2b3c;
+            color: #e2e8f0;
+            padding: 18px 22px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            position: relative;
+            padding-top: 50px;
+        }
+
+        .lstlisting .comment {
+            color: #7f9f7f;
+        }
+        .lstlisting .keyword {
+            color: #f7c948;
+        }
+        .lstlisting .func {
+            color: #7fc1f7;
+        }
+        .lstlisting .string {
+            color: #b5d99c;
+        }
+
+        /* دکمه‌ی کپی برای بلوک‌های کد */
+        .lstlisting .copy-btn {
+            float: left;
+            margin-top: -5px;
+            margin-bottom: 10px;
+            background: #2c7a7b;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .lstlisting .copy-btn:hover {
+            background: #1a5a5b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="book-page">
+
+        <!-- ========================================================== -->
+        <!-- سرصفحه (نام فصل) -->
+        <!-- ========================================================== -->
+        <div class="header-line">
+            <span class="header-left">فصل ۳</span>
+            <span class="header-right">ساختار دقیق <span class="lr">PINN</span> و ریاضیات تابع هزینه</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- فاصله‌ی ۱۰۰px از بالا -->
+        <!-- ========================================================== -->
+        <div class="chapter-spacer"></div>
+
+        <!-- ========================================================== -->
+        <!-- عنوان اصلی فصل -->
+        <!-- ========================================================== -->
+        <h1>فصل ۳: ساختار دقیق <span class="lr">PINN</span> و ریاضیات تابع هزینه</h1>
+
+        <!-- ========================================================== -->
+        <!-- جعبه اهداف -->
+        <!-- ========================================================== -->
+        <div class="pinnbox">
+            <strong>اهداف یادگیری</strong>
+            <p style="margin-top:6px;">پس از مطالعهٔ این فصل، شما قادر خواهید بود:</p>
+            <ol>
+                <li>تابع هزینهٔ <span class="lr">PINN</span> را به‌صورت ریاضی فرمول‌بندی کرده و سهم هر یک از مؤلفه‌های آن را در فرآیند آموزش تبیین نمایید.</li>
+                <li>تفاوت بنیادین نقاط کالوکیشن با مش‌بندی در روش‌های عددی کلاسیک را تشریح کنید.</li>
+                <li>قاعدهٔ زنجیره‌ای (<span class="lr">Chain Rule</span>) را در یک مثال ساده توضیح دهید و نشان دهید که چگونه در شبکه‌های عصبی به کار می‌رود.</li>
+                <li>نقش مشتق‌گیری خودکار (<span class="lr">Automatic Differentiation</span>) را در محاسبهٔ مشتقات مرتبهٔ بالا و حذف گسسته‌سازی عددی توضیح دهید.</li>
+                <li>با استفاده از یک مثال عددی دستی، فرآیند محاسبهٔ مشتق زنجیره‌ای در یک شبکهٔ عصبی را گام‌به‌گام دنبال کنید.</li>
+            </ol>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۱ -->
+        <!-- ========================================================== -->
+        <h2>از داده تا فیزیک: معماری کلی <span class="lr">PINN</span></h2>
+
+        <p>در فصل دوم دریافتیم که شبکه‌های عصبی معمولی به‌دلیل نادیده‌گرفتن قوانین فیزیک، در مسائل مهندسی با داده‌های محدود با شکست مواجه می‌شوند. <span class="lr">PINN</span> این شکاف را با گنجاندن معادلات دیفرانسیل حاکم بر مسئله در فرآیند آموزش پر می‌کند.</p>
+
+        <p>یک <span class="lr">PINN</span> از <strong>پنج مؤلفهٔ اصلی</strong> تشکیل شده است که در یک جریان دادهٔ منسجم به هم متصل می‌شوند. (توجه کنید که این مؤلفه‌های ریاضی با «۵ بلوک کدنویسی» که در فصل چهارم با آنها آشنا خواهید شد، متفاوت هستند.)</p>
+
+        <ol>
+            <li><strong>ورودی (<span class="lr">Input</span>):</strong> مختصات نقاط در دامنهٔ مسئله. بسته به نوع مسئله، ورودی می‌تواند شامل زمان ($t$)، مکان ($x, y$)، یا ترکیبی از آن‌ها باشد.</li>
+            <li><strong>شبکهٔ عصبی (<span class="lr">Neural Network</span>):</strong> یک تابع پارامتریک $\mathcal{N}(x,t;\theta)$ که با وزن‌ها و بایاس‌های $\theta$، نگاشتی از ورودی به خروجی ایجاد می‌کند.</li>
+            <li><strong>خروجی (<span class="lr">Output</span>):</strong> میدان فیزیکی مجهول مسئله. این خروجی می‌تواند اسکالر (مانند دما $T(x,t)$ یا تغییرمکان $u(t)$) یا برداری باشد.</li>
+            <li><strong>محاسبهٔ مشتقات (مشتق‌گیری خودکار):</strong> با استفاده از قابلیت مشتق‌گیری خودکار در <span class="lr">PyTorch</span> یا <span class="lr">TensorFlow</span>، مشتقات خروجی نسبت به ورودی‌ها محاسبه می‌شوند.</li>
+            <li><strong>تابع هزینه (<span class="lr">Loss Function</span>):</strong> ترکیبی از دو مؤلفهٔ اساسی: <strong>تلفات داده</strong> ($\mathcal{L}_{data}$) و <strong>تلفات فیزیک</strong> ($\mathcal{L}_{physics}$).</li>
+        </ol>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۱: معماری کلی PINN -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-03-pic-01.png" alt="معماری کلی PINN">
+            <div class="figure-caption">
+                شکل ۳-۱: معماری کلی <span class="lr">PINN</span> — جریان داده از ورودی تا تابع هزینه
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۲ -->
+        <!-- ========================================================== -->
+        <h2>فرمول‌بندی ریاضی تابع هزینه</h2>
+
+        <p>هستهٔ اصلی <span class="lr">PINN</span>، تابع هزینهٔ ترکیبی آن است که به‌صورت زیر تعریف می‌شود:</p>
+        <div class="equation">
+            $$ \mathcal{L}_{total} = \mathcal{L}_{data} + \mathcal{L}_{physics} $$
+        </div>
+
+        <h3>تلفات داده ($\mathcal{L}_{data}$)</h3>
+        <p>این مؤلفه، مسئولیت تطبیق خروجی شبکه با داده‌های موجود را بر عهده دارد:</p>
+        <div class="equation">
+            $$ \mathcal{L}_{data} = \frac{1}{N_{data}} \sum_{i=1}^{N_{data}} \left( \mathcal{N}(x_i, t_i; \theta) - u_{data}(x_i, t_i) \right)^2 $$
+        </div>
+
+        <h3>تلفات فیزیک ($\mathcal{L}_{physics}$)</h3>
+        <p>این مؤلفه، مسئولیت ارضا شدن معادلهٔ دیفرانسیل حاکم بر مسئله را در نقاط داخلی دامنه بر عهده دارد:</p>
+        <div class="equation">
+            $$ \mathcal{L}_{physics} = \frac{1}{N_{col}} \sum_{j=1}^{N_{col}} \left( \mathcal{F}[\mathcal{N}](x_j, t_j; \theta) \right)^2 $$
+        </div>
+        <p>که در آن $\mathcal{F}$ یک عملگر دیفرانسیلی است (برای مثال، در معادلهٔ گرما، $\mathcal{F}[T] = \partial T/\partial t - \alpha \partial^2 T/\partial x^2$).</p>
+
+        <h3>اهمیت نقاط کالوکیشن در مقابل مش‌بندی</h3>
+        <p>در روش‌های عددی کلاسیک مانند <span class="lr">FEM</span>، دامنهٔ مسئله به تعداد زیادی المان کوچک (مش) تقسیم می‌شود. در <span class="lr">PINN</span>، به‌جای مش‌بندی، از <strong>نقاط کالوکیشن (<span class="lr">Collocation Points</span>)</strong> استفاده می‌شود که به‌صورت تصادفی در داخل دامنه توزیع می‌شوند.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><strong>معیار</strong></th>
+                    <th><strong>مش‌بندی (<span class="lr">FEM</span>)</strong></th>
+                    <th><strong>نقاط کالوکیشن (<span class="lr">PINN</span>)</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>وابستگی به هندسه</td>
+                    <td>بالا (نیاز به تطابق مش با مرزها)</td>
+                    <td>کم (نقاط تصادفی مستقل از هندسه)</td>
+                </tr>
+                <tr>
+                    <td>هزینهٔ تولید</td>
+                    <td>بالا (نیاز به نرم‌افزارهای تخصصی)</td>
+                    <td>پایین (تولید تصادفی با چند خط کد)</td>
+                </tr>
+                <tr>
+                    <td>دقت در مرزها</td>
+                    <td>بالا (تطابق کامل با مرزها)</td>
+                    <td>وابسته به تعداد نقاط نزدیک مرز</td>
+                </tr>
+                <tr>
+                    <td>انعطاف‌پذیری در هندسه‌های متغیر</td>
+                    <td>کم</td>
+                    <td>بالا</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۳ -->
+        <!-- ========================================================== -->
+        <h2>یادآوری قاعدهٔ زنجیره‌ای (<span class="lr">Chain Rule</span>) با یک مثال ملموس</h2>
+
+        <p>برای درک مشتق‌گیری خودکار، ابتدا باید قاعدهٔ زنجیره‌ای را به‌خوبی به خاطر بیاوریم.</p>
+
+        <p><strong>فرمول کلی قاعدهٔ زنجیره‌ای:</strong> اگر $y = f(u)$ و $u = g(x)$ باشد، آن‌گاه:</p>
+        <div class="equation">
+            $$ \frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx} $$
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۲: قاعده زنجیره‌ای -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-03-pic-02.png" alt="نمایش گرافیکی قاعده زنجیره‌ای">
+            <div class="figure-caption">
+                شکل ۳-۲: نمایش گرافیکی قاعدهٔ زنجیره‌ای — مسیر محاسبهٔ مشتق در یک زنجیره
+            </div>
+        </div>
+
+        <p><strong>یک مثال عددی ساده:</strong> فرض کنید می‌خواهیم مشتق تابع $f(x) = \sin(x^2)$ را در نقطهٔ $x = 2$ محاسبه کنیم.</p>
+        <ul>
+            <li>$u = x^2$ و $y = \sin(u)$</li>
+            <li>$\frac{du}{dx} = 2x = 4$ (در $x=2$)</li>
+            <li>$\frac{dy}{du} = \cos(u) = \cos(4) \approx -0.654$</li>
+            <li>$\frac{dy}{dx} = (-0.654) \times 4 = -2.616$</li>
+        </ul>
+
+        <p>در یک شبکهٔ عصبی، این زنجیره بسیار طولانی‌تر است، اما اصل یکسان باقی می‌ماند: <strong>مشتق نهایی، حاصل‌ضرب مشتقات جزئی هر حلقه است.</strong></p>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۴ -->
+        <!-- ========================================================== -->
+        <h2>مشتق‌گیری خودکار (<span class="lr">Automatic Differentiation</span>) چیست و چرا دقیق است؟</h2>
+
+        <p>در <span class="lr">PINN</span>، برای محاسبهٔ تلفات فیزیک، به مشتقات خروجی شبکه نسبت به ورودی‌ها نیاز داریم. سه روش کلی برای محاسبهٔ مشتق وجود دارد:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><strong>روش</strong></th>
+                    <th><strong>توضیح</strong></th>
+                    <th><strong>مزایا</strong></th>
+                    <th><strong>معایب</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>مشتق‌گیری عددی (تفاضل محدود)</td>
+                    <td>تقریب با $\frac{f(x+h)-f(x)}{h}$</td>
+                    <td>ساده و عمومی</td>
+                    <td>خطای گسسته‌سازی، هزینهٔ بالا</td>
+                </tr>
+                <tr>
+                    <td>مشتق‌گیری نمادین (<span class="lr">Symbolic</span>)</td>
+                    <td>استفاده از قواعد ریاضی</td>
+                    <td>دقت ۱۰۰\%</td>
+                    <td>انفجار عبارت برای توابع پیچیده</td>
+                </tr>
+                <tr>
+                    <td>مشتق‌گیری خودکار (<span class="lr">Autograd</span>)</td>
+                    <td>گراف محاسباتی + قاعدهٔ زنجیره‌ای</td>
+                    <td>دقت ۱۰۰\%، هزینهٔ پایین</td>
+                    <td>نیازمند کتابخانه‌های خاص</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>چرا روش عددی دقیق نیست؟ یک مثال ملموس</h3>
+        <p>فرض کنید $f(x) = x^3$ در $x=2$. جواب دقیق $f'(2) = 12$ است.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><strong>اندازهٔ گام ($h$)</strong></th>
+                    <th><strong>مقدار تقریبی</strong></th>
+                    <th><strong>خطا</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>$10^{-1}$</td>
+                    <td>12.61</td>
+                    <td>$5.08\%$</td>
+                </tr>
+                <tr>
+                    <td>$10^{-3}$</td>
+                    <td>12.006</td>
+                    <td>$0.05\%$</td>
+                </tr>
+                <tr>
+                    <td>$10^{-6}$</td>
+                    <td>12.000000999</td>
+                    <td>$8.3 \times 10^{-6}\%$</td>
+                </tr>
+                <tr>
+                    <td>$10^{-10}$</td>
+                    <td>11.999999760</td>
+                    <td>$2 \times 10^{-6}\%$ (شروع ناپایداری)</td>
+                </tr>
+                <tr>
+                    <td>$10^{-15}$</td>
+                    <td>13.210...</td>
+                    <td>$10\%$ (ناپایداری شدید)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۳: مقایسه روش‌های مشتق‌گیری -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-03-pic-03.png" alt="مقایسه روش‌های مشتق‌گیری">
+            <div class="figure-caption">
+                شکل ۳-۳: مقایسهٔ روش‌های مشتق‌گیری — دقت و پایداری روش <span class="lr">Autograd</span> در برابر تفاضل محدود
+            </div>
+        </div>
+
+        <p><strong>با روش <span class="lr">Autograd</span> در <span class="lr">PyTorch</span>:</strong></p>
+        <div class="lstlisting">
+            <span class="keyword">import</span> torch
+            x = torch.tensor(2.0, requires_grad=True)
+            f = x**3
+            f.backward()
+            <span class="func">print</span>(x.grad)  <span class="comment"># خروجی: tensor(12.0)</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۵ -->
+        <!-- ========================================================== -->
+        <h2>ملاحظات عملی در فرمول‌بندی تابع هزینه</h2>
+
+        <h3>وزن‌دهی به مؤلفه‌های تلفات</h3>
+        <p>در بسیاری از مسائل، دامنهٔ عددی $\mathcal{L}_{physics}$ و $\mathcal{L}_{data}$ تفاوت چشمگیری دارد. برای جبران این ناهمواری، از <strong>وزن‌های ضرایب</strong> استفاده می‌شود:</p>
+        <div class="equation">
+            $$ \mathcal{L}_{total} = \lambda_{data} \cdot \mathcal{L}_{data} + \lambda_{physics} \cdot \mathcal{L}_{physics} $$
+        </div>
+
+        <h3>انتخاب نقاط کالوکیشن</h3>
+        <ul>
+            <li><strong>تعداد نقاط:</strong> حداقل ۱۰۰۰ نقطه در هر بُعد از دامنه.</li>
+            <li><strong>نحوهٔ توزیع:</strong> نمونه‌برداری تصادفی یکنواخت برای شروع.</li>
+            <li><strong>نقاط مرزی:</strong> برای اعمال دقیق شرایط مرزی، نقاط مرزی را به‌صورت جداگانه در نظر بگیرید.</li>
+        </ul>
+
+        <!-- ========================================================== -->
+        <!-- جمع‌بندی -->
+        <!-- ========================================================== -->
+        <h2>جمع‌بندی و مسیر پیش‌رو</h2>
+
+        <p>در این فصل، با معماری <span class="lr">PINN</span>، فرمول‌بندی ریاضی تابع هزینه، قاعدهٔ زنجیره‌ای و نقش مشتق‌گیری خودکار آشنا شدیم. نکات کلیدی عبارت‌اند از:</p>
+
+        <ol>
+            <li>تابع هزینهٔ <span class="lr">PINN</span> از دو مؤلفهٔ $\mathcal{L}_{data}$ و $\mathcal{L}_{physics}$ تشکیل شده است.</li>
+            <li>نقاط کالوکیشن، جایگزین مش‌بندی در روش‌های کلاسیک می‌شوند و <span class="lr">PINN</span> را از گسسته‌سازی دامنه بی‌نیاز می‌سازند.</li>
+            <li>قاعدهٔ زنجیره‌ای، هستهٔ اصلی محاسبهٔ مشتق در شبکه‌های عصبی است و مشتق‌گیری خودکار (<span class="lr">Autograd</span>) دقیقاً همان قاعده را با دقت ماشین پیاده‌سازی می‌کند.</li>
+            <li>تنظیم وزن‌های ضرایب در تابع هزینه و انتخاب تعداد مناسب نقاط کالوکیشن، از عوامل کلیدی در موفقیت آموزش <span class="lr">PINN</span> هستند.</li>
+        </ol>
+
+        <p><strong>پل به فصل چهارم:</strong> در فصل بعد، تمام مفاهیم ریاضی و ساختاری این سه فصل را در قالب یک کد اجرایی در <span class="lr">PyTorch</span> پیاده‌سازی خواهیم کرد.</p>
+
+        <!-- ========================================================== -->
+        <!-- تمرین‌های عملی -->
+        <!-- ========================================================== -->
+        <h2 style="margin-top:40px;">تمرین‌های عملی</h2>
+
+        <ol>
+            <li>
+                <strong>تمرین ۱ (فرمول‌بندی تابع هزینه):</strong> معادلهٔ پرتاب توپ $\frac{d^2x}{dt^2} = -g$ با شرایط اولیه $x(0) = h_0$ و $\dot{x}(0) = 0$ را در نظر بگیرید. تابع هزینهٔ <span class="lr">PINN</span> را برای این مسئله بنویسید.
+            </li>
+            <li>
+                <strong>تمرین ۲ (محاسبهٔ دستی مشتق با قاعدهٔ زنجیره‌ای):</strong> یک شبکه با ۱ نورون در لایهٔ پنهان (وزن $w = 0.3$، بایاس $b = 0.2$، تابع فعال‌سازی $\tanh$) و ۱ نورون خروجی (وزن $v = 0.6$، بایاس $c = 0.1$) را در نظر بگیرید. مشتق خروجی شبکه را نسبت به ورودی $t = 2.0$ با استفاده از قاعدهٔ زنجیره‌ای محاسبه کنید.
+            </li>
+            <li>
+                <strong>تمرین ۳ (تحلیل نقاط کالوکیشن):</strong> مسئلهٔ گرمای یک‌بعدی $\frac{\partial T}{\partial t} = \alpha \frac{\partial^2 T}{\partial x^2}$ را با شرایط مرزی دما $T(0,t) = T(1,t) = 0$ و شرط اولیهٔ سینوسی در نظر بگیرید. برای تولید نقاط کالوکیشن در این مسئله، چه تعداد و چه توزیعی از نقاط را پیشنهاد می‌دهید؟
+            </li>
+        </ol>
+
+        <!-- ========================================================== -->
+        <!-- مرجع تکمیلی -->
+        <!-- ========================================================== -->
+        <div class="reference">
+            <strong>مرجع تکمیلی</strong><br>
+            مستندات رسمی <span class="lr">PyTorch</span> در بخش <span class="lr">torch.autograd</span> (<span class="lr">pytorch.org/docs/stable/autograd.html</span>) و مقالهٔ اصلی <span class="lr">Raissi et al. (2019)</span>.
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- پانویس (شماره صفحه) -->
+        <!-- ========================================================== -->
+        <div class="footer-line">
+            — ۴۳ —
+        </div>
+
+    </div>
+
+</body>
+</html>

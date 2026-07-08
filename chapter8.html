@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فصل ۸: تحلیل مودال و مسائل مقدار ویژه با PINN</title>
+
+    <!-- لینک به فونت‌ها -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+    <!-- لینک به استایل و اسکریپت مشترک -->
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+
+    <!-- MathJax برای فرمول‌ها -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ['$', '$'],
+                    ['\\(', '\\)']
+                ],
+                displayMath: [
+                    ['$$', '$$'],
+                    ['\\[', '\\]']
+                ],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+
+    <style>
+        .figure-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e2edf0;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .figure-caption {
+            font-size: 14px;
+            color: #4a5a6a;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        .figure-caption .lr {
+            font-weight: 600;
+        }
+
+        .lstlisting {
+            direction: ltr;
+            background: #1e2b3c;
+            color: #e2e8f0;
+            padding: 18px 22px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            position: relative;
+            padding-top: 50px;
+        }
+
+        .lstlisting .comment {
+            color: #7f9f7f;
+        }
+        .lstlisting .keyword {
+            color: #f7c948;
+        }
+        .lstlisting .func {
+            color: #7fc1f7;
+        }
+        .lstlisting .string {
+            color: #b5d99c;
+        }
+        .lstlisting .number {
+            color: #e8a87c;
+        }
+
+        .lstlisting .copy-btn {
+            float: left;
+            margin-top: -5px;
+            margin-bottom: 10px;
+            background: #2c7a7b;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .lstlisting .copy-btn:hover {
+            background: #1a5a5b;
+        }
+
+        table.compare-table td {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="book-page">
+
+        <!-- ========================================================== -->
+        <!-- سرصفحه -->
+        <!-- ========================================================== -->
+        <div class="header-line">
+            <span class="header-left">فصل ۸</span>
+            <span class="header-right">تحلیل مودال و مسائل مقدار ویژه با <span class="lr">PINN</span></span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- فاصله‌ی ۱۰۰px از بالا -->
+        <!-- ========================================================== -->
+        <div class="chapter-spacer"></div>
+
+        <!-- ========================================================== -->
+        <!-- عنوان اصلی -->
+        <!-- ========================================================== -->
+        <h1>فصل ۸: تحلیل مودال و مسائل مقدار ویژه با <span class="lr">PINN</span></h1>
+
+        <!-- ========================================================== -->
+        <!-- جعبه اهداف -->
+        <!-- ========================================================== -->
+        <div class="pinnbox">
+            <strong>اهداف یادگیری</strong>
+            <p style="margin-top:6px;">پس از مطالعهٔ این فصل، شما قادر خواهید بود:</p>
+            <ol>
+                <li>چالش‌های روش‌های کلاسیک در تحلیل مودال سازه‌ها را توضیح دهید.</li>
+                <li>یک مسئلهٔ مقدار ویژه (فرکانس طبیعی و شکل مود) را با استفاده از <span class="lr">PINN</span> فرمول‌بندی کنید.</li>
+                <li>پارامتر فرکانس طبیعی را به‌عنوان <span class="lr">nn.Parameter</span> تعریف کرده و قید نرم‌سازی شکل مود را به تابع هزینه اضافه کنید.</li>
+                <li>روش <span class="lr">Deflation</span> را برای یافتن مودهای بالاتر (مودهای دوم، سوم، و ...) پیاده‌سازی کنید.</li>
+                <li>یک <span class="lr">PINN</span> را برای تحلیل مودال تیر اویلر-برنولی اجرا کرده و نتایج را با جواب تحلیلی مقایسه نمایید.</li>
+                <li>کاربرد تحلیل مودال <span class="lr">PINN</span> را در شناسایی مشخصات دینامیکی سازه‌های ریلی تشریح کنید.</li>
+            </ol>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۱ -->
+        <!-- ========================================================== -->
+        <h2>چالش‌های روش‌های کلاسیک در تحلیل مودال</h2>
+
+        <p>تحلیل مودال، هستهٔ اصلی علم ارتعاشات است. فرکانس‌های طبیعی و شکل‌های مودی یک سازه، برای طراحی، پایش سلامت، و کنترل ارتعاشات حیاتی هستند. در حوزهٔ راه‌آهن، این تحلیل برای موارد زیر کاربرد دارد:</p>
+        <ul>
+            <li>تعیین فرکانس‌های طبیعی تیرهای راه‌آهن و واگن‌ها برای جلوگیری از تشدید.</li>
+            <li>شناسایی مشخصات دینامیکی بوژی‌ها (سختی فنرها و جرم‌ها) از روی داده‌های آزمایشی.</li>
+            <li>ارزیابی تأثیر آسیب‌های سازه‌ای بر روی فرکانس‌های طبیعی (پایش سلامت).</li>
+        </ul>
+
+        <p>روش‌های کلاسیک (مانند <span class="lr">FEM</span>) برای تحلیل مودال، نیازمند حل یک مسئلهٔ مقدار ویژهٔ ماتریسی بزرگ هستند:</p>
+        <div class="equation">
+            $$ [K] \phi_i = \omega_i^2 [M] \phi_i $$
+        </div>
+
+        <p>این روش‌ها سه چالش اساسی دارند:</p>
+        <ol>
+            <li><strong>هزینهٔ محاسباتی بالا:</strong> برای سازه‌های بزرگ با میلیون‌ها درجه آزادی، حل مسئلهٔ مقدار ویژه بسیار زمان‌بر و حافظه‌بر است.</li>
+            <li><strong>وابستگی به مش:</strong> کیفیت فرکانس‌ها و شکل‌های مودی به شدت به کیفیت مش بستگی دارد.</li>
+            <li><strong>مشکل در مواد ناهمگن:</strong> برای سازه‌هایی با خواص متغیر مکانی، مدل‌سازی دقیق با <span class="lr">FEM</span> پیچیده می‌شود.</li>
+        </ol>
+
+        <p><strong>روش <span class="lr">PINN</span> برای تحلیل مودال</strong><br>
+            <span class="lr">PINN</span> با تعریف فرکانس طبیعی ($\omega$) به‌عنوان یک <span class="lr">nn.Parameter</span> و شکل مود ($\phi(x)$) به‌عنوان خروجی شبکه، این مسئله را به یک <strong>مسئلهٔ بهینه‌سازی بدون مش</strong> تبدیل می‌کند.
+        </p>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۲ -->
+        <!-- ========================================================== -->
+        <h2>فرمول‌بندی مسئلهٔ مقدار ویژه با <span class="lr">PINN</span></h2>
+
+        <p>به‌عنوان یک مثال کلاسیک، <strong>تیر اویلر-برنولی</strong> را در نظر بگیرید:</p>
+
+        <div class="equation">
+            $$ EI \frac{d^4 \phi}{dx^4} - \omega^2 \rho A \phi = 0, \quad x \in [0, L] $$
+        </div>
+
+        <p><strong>شرایط مرزی برای تیر یک‌سرگیردار (<span class="lr">Cantilever</span>):</strong></p>
+        <ul>
+            <li>در $x = 0$ (گیردار): $\phi(0) = 0$ و $\phi'(0) = 0$</li>
+            <li>در $x = L$ (آزاد): $EI \cdot \phi''(L) = 0$ و $EI \cdot \phi'''(L) = 0$</li>
+        </ul>
+
+        <p><strong>تعریف متغیرها در <span class="lr">PINN</span>:</strong></p>
+        <ul>
+            <li><strong>ورودی شبکه:</strong> $x$ (مکان)</li>
+            <li><strong>خروجی شبکه:</strong> $\phi(x)$ (شکل مود)</li>
+            <li><strong>پارامتر یادگیرنده:</strong> $\omega$ (فرکانس زاویه‌ای طبیعی) → <span class="lr">nn.Parameter</span></li>
+        </ul>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۳ -->
+        <!-- ========================================================== -->
+        <h2>تابع هزینه و قید نرم‌سازی</h2>
+
+        <p>تابع هزینه از چهار مؤلفه تشکیل شده است:</p>
+
+        <h3>تلفات فیزیک (معادله دیفرانسیل)</h3>
+        <div class="equation">
+            $$ \mathcal{L}_{PDE} = \frac{1}{N_{col}} \sum_{j=1}^{N_{col}} \left( EI \cdot \frac{d^4 \phi}{dx^4}(x_j) - \omega^2 \rho A \cdot \phi(x_j) \right)^2 $$
+        </div>
+
+        <p>برای محاسبهٔ مشتق مرتبهٔ ۴ با <span class="lr">Autograd</span>:</p>
+        <div class="lstlisting" style="padding-top:20px;">
+            d1_phi = torch.autograd.grad(phi, x, grad_outputs=torch.ones_like(phi), create_graph=True)[0]
+            d2_phi = torch.autograd.grad(d1_phi, x, grad_outputs=torch.ones_like(d1_phi), create_graph=True)[0]
+            d3_phi = torch.autograd.grad(d2_phi, x, grad_outputs=torch.ones_like(d2_phi), create_graph=True)[0]
+            d4_phi = torch.autograd.grad(d3_phi, x, grad_outputs=torch.ones_like(d3_phi), create_graph=True)[0]
+        </div>
+
+        <h3>تلفات شرایط مرزی (با روش <span class="lr">SDF</span> از فصل ۱۱)</h3>
+        <p>برای اعمال دقیق شرایط مرزی یک‌سرگیردار:</p>
+        <div class="equation">
+            $$ \phi_{NN}(x) = x^2 \cdot \mathcal{N}(x) $$
+        </div>
+
+        <h3>قید نرم‌سازی (برای جلوگیری از جواب صفر)</h3>
+        <div class="equation">
+            $$ \mathcal{L}_{norm} = \left( \int_0^L \phi(x)^2 dx - 1 \right)^2 $$
+        </div>
+
+        <h3>تلفات کل</h3>
+        <div class="equation">
+            $$ \mathcal{L}_{total} = \mathcal{L}_{PDE} + \lambda_{BC} \cdot \mathcal{L}_{BC} + \lambda_{norm} \cdot \mathcal{L}_{norm} $$
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۴ -->
+        <!-- ========================================================== -->
+        <h2>روش <span class="lr">Deflation</span> برای یافتن مودهای بالاتر</h2>
+
+        <p>شبکهٔ عصبی به‌طور طبیعی به <strong>اولین مود</strong> (کوچک‌ترین فرکانس) همگرا می‌شود. برای یافتن مودهای بالاتر، از <strong>روش <span class="lr">Deflation</span></strong> استفاده می‌کنیم:</p>
+
+        <div class="equation">
+            $$ \mathcal{L}_{deflation} = \sum_{k=1}^{i} \left( \frac{1}{N} \sum_{j=1}^{N} \phi_{new}(x_j) \cdot \phi_k(x_j) \right)^2 $$
+        </div>
+
+        <p>با این روش، شبکه مجبور می‌شود مودهای جدید و متعامد بر مودهای قبلی را پیدا کند.</p>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۱: شکل مودها -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-08-pic-01.png" alt="مقایسه شکل مودهای PINN و جواب تحلیلی">
+            <div class="figure-caption">
+                شکل ۸-۱: مقایسهٔ شکل مودهای اول تا سوم استخراج‌شده با <span class="lr">PINN</span> (خط آبی) و جواب تحلیلی (خط قرمز چین)
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۵ -->
+        <!-- ========================================================== -->
+        <h2>کد کامل <span class="lr">PINN</span> برای تحلیل مودال</h2>
+
+        <div class="lstlisting">
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۱: تعریف شبکه با قید سخت (SDF)</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            <span class="keyword">import</span> torch
+            <span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn
+            <span class="keyword">import</span> numpy <span class="keyword">as</span> np
+            <span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt
+
+            <span class="keyword">class</span> <span class="func">PINN_Modal</span>(nn.Module):
+                <span class="keyword">def</span> <span class="func">__init__</span>(self, layers=[1, 50, 50, 50, 1]):
+                    <span class="keyword">super</span>(PINN_Modal, self).__init__()
+                    self.net = nn.Sequential()
+                    <span class="keyword">for</span> i <span class="keyword">in</span> range(len(layers) - 1):
+                        self.net.add_module(<span class="string">f'linear_{i}'</span>, nn.Linear(layers[i], layers[i+1]))
+                        <span class="keyword">if</span> i < len(layers) - 2:
+                            self.net.add_module(<span class="string">f'tanh_{i}'</span>, nn.Tanh())
+
+                    self.omega = nn.Parameter(torch.tensor(<span class="number">5.0</span>))
+
+                <span class="keyword">def</span> <span class="func">forward</span>(self, x):
+                    u = self.net(x)
+                    SDF = x**2
+                    phi = SDF * u
+                    <span class="keyword">return</span> phi
+
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۲: پارامترهای مسئله</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            L = <span class="number">1.0</span>
+            EI = <span class="number">1.0</span>
+            rhoA = <span class="number">1.0</span>
+            N_col = <span class="number">1000</span>
+
+            x_col = torch.rand(N_col, <span class="number">1</span>, requires_grad=True) * L
+            x_bc = torch.tensor([[L]], requires_grad=True)
+
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۳: تابع هزینه</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            <span class="keyword">def</span> <span class="func">compute_loss</span>(model, x_col, x_bc, previous_modes=[]):
+                phi = model(x_col)
+                omega = model.omega
+
+                d1 = torch.autograd.grad(phi, x_col, grad_outputs=torch.ones_like(phi),
+                                         create_graph=True, retain_graph=True)[0]
+                d2 = torch.autograd.grad(d1, x_col, grad_outputs=torch.ones_like(d1),
+                                         create_graph=True, retain_graph=True)[0]
+                d3 = torch.autograd.grad(d2, x_col, grad_outputs=torch.ones_like(d2),
+                                         create_graph=True, retain_graph=True)[0]
+                d4 = torch.autograd.grad(d3, x_col, grad_outputs=torch.ones_like(d3),
+                                         create_graph=True, retain_graph=True)[0]
+
+                residual = EI * d4 - omega**2 * rhoA * phi
+                loss_pde = torch.mean(residual**2)
+
+                phi_bc = model(x_bc)
+                d1_bc = torch.autograd.grad(phi_bc, x_bc, grad_outputs=torch.ones_like(phi_bc),
+                                            create_graph=True, retain_graph=True)[0]
+                d2_bc = torch.autograd.grad(d1_bc, x_bc, grad_outputs=torch.ones_like(d1_bc),
+                                            create_graph=True, retain_graph=True)[0]
+                d3_bc = torch.autograd.grad(d2_bc, x_bc, grad_outputs=torch.ones_like(d2_bc),
+                                            create_graph=True, retain_graph=True)[0]
+                loss_bc = (d2_bc**2 + d3_bc**2).mean()
+
+                phi_norm = torch.mean(phi**2)
+                loss_norm = (phi_norm - <span class="number">1.0</span>)**2
+
+                loss_deflation = <span class="number">0.0</span>
+                <span class="keyword">for</span> prev_phi <span class="keyword">in</span> previous_modes:
+                    correlation = torch.mean(phi * prev_phi)
+                    loss_deflation += correlation**2
+
+                loss = loss_pde + <span class="number">1.0</span> * loss_bc + <span class="number">10.0</span> * loss_norm + <span class="number">10.0</span> * loss_deflation
+                <span class="keyword">return</span> loss, loss_pde, loss_bc, loss_norm, loss_deflation
+
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۴: یافتن متوالی مودها</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            <span class="keyword">def</span> <span class="func">find_mode</span>(previous_modes=[]):
+                model = PINN_Modal()
+                optimizer = torch.optim.Adam(model.parameters(), lr=<span class="number">1e-3</span>)
+
+                n_epochs = <span class="number">10000</span>
+                <span class="keyword">for</span> epoch <span class="keyword">in</span> range(n_epochs):
+                    optimizer.zero_grad()
+                    loss, _, _, _, _ = compute_loss(model, x_col, x_bc, previous_modes)
+                    loss.backward()
+                    optimizer.step()
+                    <span class="keyword">if</span> (epoch + <span class="number">1</span>) % <span class="number">2000</span> == <span class="number">0</span>:
+                        <span class="func">print</span>(<span class="string">f'Epoch {epoch+1}, ω: {model.omega.item():.4f}'</span>)
+
+                optimizer_lbfgs = torch.optim.LBFGS(model.parameters(), lr=<span class="number">1.0</span>, max_iter=<span class="number">500</span>)
+                <span class="keyword">def</span> <span class="func">closure</span>():
+                    optimizer_lbfgs.zero_grad()
+                    loss, _, _, _, _ = compute_loss(model, x_col, x_bc, previous_modes)
+                    loss.backward()
+                    <span class="keyword">return</span> loss
+                optimizer_lbfgs.step(closure)
+
+                x_eval = torch.linspace(<span class="number">0</span>, L, <span class="number">200</span>).reshape(-<span class="number">1</span>, <span class="number">1</span>)
+                <span class="keyword">with</span> torch.no_grad():
+                    phi_mode = model(x_eval).numpy().squeeze()
+
+                phi_mode = phi_mode / np.sqrt(np.trapz(phi_mode**2, x_eval.numpy().squeeze()))
+                <span class="keyword">return</span> model.omega.item(), phi_mode, x_eval.numpy().squeeze()
+
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+            <span class="comment"># بلوک ۵: اجرا و مقایسه با جواب تحلیلی</span>
+            <span class="comment"># ════════════════════════════════════════════════════════════</span>
+
+            <span class="keyword">def</span> <span class="func">analytical_cantilever</span>(modes=3):
+                betaL = [<span class="number">1.8751</span>, <span class="number">4.6941</span>, <span class="number">7.8548</span>, <span class="number">10.9955</span>]
+                x_vals = np.linspace(<span class="number">0</span>, L, <span class="number">200</span>)
+                omega_vals = []
+                phi_vals = []
+                <span class="keyword">for</span> i <span class="keyword">in</span> range(modes):
+                    b = betaL[i] / L
+                    omega = (b**2) * np.sqrt(EI/rhoA)
+                    omega_vals.append(omega)
+                    sigma = (np.cosh(betaL[i]) + np.cos(betaL[i])) / (np.sinh(betaL[i]) + np.sin(betaL[i]))
+                    phi = np.cosh(b*x_vals) - np.cos(b*x_vals) - sigma * (np.sinh(b*x_vals) - np.sin(b*x_vals))
+                    phi = phi / np.sqrt(np.trapz(phi**2, x_vals))
+                    phi_vals.append(phi)
+                <span class="keyword">return</span> omega_vals, phi_vals, x_vals
+
+            <span class="func">print</span>(<span class="string">"=== Finding Mode 1 ==="</span>)
+            omega1, phi1, x1 = find_mode([])
+
+            <span class="func">print</span>(<span class="string">"\n=== Finding Mode 2 ==="</span>)
+            prev1 = torch.tensor(phi1, dtype=torch.float32).reshape(-<span class="number">1</span>, <span class="number">1</span>)
+            omega2, phi2, x2 = find_mode([prev1])
+
+            <span class="func">print</span>(<span class="string">"\n=== Finding Mode 3 ==="</span>)
+            prev2 = torch.tensor(phi2, dtype=torch.float32).reshape(-<span class="number">1</span>, <span class="number">1</span>)
+            omega3, phi3, x3 = find_mode([prev1, prev2])
+
+            omega_analytical, phi_analytical, x_analytical = analytical_cantilever(<span class="number">3</span>)
+
+            fig, axes = plt.subplots(<span class="number">2</span>, <span class="number">2</span>, figsize=(<span class="number">12</span>, <span class="number">10</span>))
+
+            modes = [(omega1, phi1, <span class="number">0</span>), (omega2, phi2, <span class="number">1</span>), (omega3, phi3, <span class="number">2</span>)]
+            <span class="keyword">for</span> ax, (omega, phi, idx) <span class="keyword">in</span> zip(axes.flatten()[:3], modes):
+                ax.plot(x1, phi, <span class="string">'b-'</span>, linewidth=<span class="number">2</span>, label=<span class="string">'PINN'</span>)
+                ax.plot(x_analytical, phi_analytical[idx], <span class="string">'r--'</span>, linewidth=<span class="number">2</span>, label=<span class="string">'Analytical'</span>)
+                ax.set_xlabel(<span class="string">'x (m)'</span>)
+                ax.set_ylabel(<span class="string">'φ(x)'</span>)
+                ax.set_title(<span class="string">f'Mode {idx+1}: ω_PINN={omega:.3f}, ω_Analytical={omega_analytical[idx]:.3f}'</span>)
+                ax.legend()
+                ax.grid(True)
+
+            errors = [abs(omega - omega_analytical[i]) / omega_analytical[i] * <span class="number">100</span> <span class="keyword">for</span> i, omega <span class="keyword">in</span> enumerate([omega1, omega2, omega3])]
+            data = [[<span class="string">'Mode'</span>, <span class="string">'Analytical ω'</span>, <span class="string">'PINN ω'</span>, <span class="string">'Error (%)'</span>],
+                    [<span class="string">'1'</span>, <span class="string">f'{omega_analytical[0]:.4f}'</span>, <span class="string">f'{omega1:.4f}'</span>, <span class="string">f'{errors[0]:.2f}'</span>],
+                    [<span class="string">'2'</span>, <span class="string">f'{omega_analytical[1]:.4f}'</span>, <span class="string">f'{omega2:.4f}'</span>, <span class="string">f'{errors[1]:.2f}'</span>],
+                    [<span class="string">'3'</span>, <span class="string">f'{omega_analytical[2]:.4f}'</span>, <span class="string">f'{omega3:.4f}'</span>, <span class="string">f'{errors[2]:.2f}'</span>]]
+            axes[<span class="number">1</span>, <span class="number">1</span>].axis(<span class="string">'off'</span>)
+            table = axes[<span class="number">1</span>, <span class="number">1</span>].table(cellText=data, loc=<span class="string">'center'</span>, cellLoc=<span class="string">'center'</span>, colWidths=[<span class="number">0.15</span>, <span class="number">0.25</span>, <span class="number">0.25</span>, <span class="number">0.2</span>])
+            table.auto_set_font_size(False)
+            table.set_fontsize(<span class="number">12</span>)
+
+            plt.tight_layout()
+            plt.show()
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- عکس ۲: جدول مقایسه فرکانس‌ها -->
+        <!-- ========================================================== -->
+        <div class="figure-container">
+            <img src="chapter-08-pic-02.png" alt="مقایسه فرکانس‌های طبیعی">
+            <div class="figure-caption">
+                شکل ۸-۲: مقایسهٔ فرکانس‌های طبیعی استخراج‌شده با <span class="lr">PINN</span> و جواب تحلیلی — خطای نسبی برای هر مود
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- بخش ۶ -->
+        <!-- ========================================================== -->
+        <h2>مزایا و محدودیت‌های روش <span class="lr">PINN</span> در تحلیل مودال</h2>
+
+        <p><strong>مزایا نسبت به روش‌های کلاسیک (<span class="lr">FEM</span>):</strong></p>
+        <ol>
+            <li><strong>عدم نیاز به مش:</strong> <span class="lr">PINN</span> مستقل از تولید مش است و برای هندسه‌های پیچیده بسیار کارآمد است.</li>
+            <li><strong>سهولت در مواد ناهمگن:</strong> با تعریف توابع $EI(x)$ و $\rho A(x)$ در تابع هزینه، به‌سادگی حل می‌شود.</li>
+            <li><strong>ترکیب با مسائل معکوس و پارامتریک:</strong> <span class="lr">PINN</span> مودال را می‌توان با رویکردهای فصل ۶ (شناسایی پارامتر) و فصل ۷ (پارامتریک) ترکیب کرد.</li>
+        </ol>
+
+        <p><strong>محدودیت‌ها و چالش‌ها:</strong></p>
+        <ol>
+            <li><strong>حساسیت به ابرپارامترها:</strong> عملکرد <span class="lr">PINN</span> به وزن‌های تابع هزینه و تعداد نقاط کالوکیشن وابسته است.</li>
+            <li><strong>هزینهٔ محاسباتی آموزش:</strong> برای یافتن هر مود، شبکه باید به‌طور جداگانه آموزش داده شود.</li>
+            <li><strong>دقت محدود برای مودهای بالا:</strong> با افزایش شمارهٔ مود، خطای تخمین افزایش می‌یابد.</li>
+        </ol>
+
+        <!-- ========================================================== -->
+        <!-- جمع‌بندی -->
+        <!-- ========================================================== -->
+        <h2>جمع‌بندی و مسیر پیش‌رو</h2>
+
+        <p>در این فصل، با یکی از مهم‌ترین کاربردهای <span class="lr">PINN</span> در حوزهٔ ارتعاشات آشنا شدیم. نکات کلیدی:</p>
+
+        <ol>
+            <li><strong>فرمول‌بندی:</strong> با تعریف فرکانس طبیعی به‌عنوان <span class="lr">nn.Parameter</span> و شکل مود به‌عنوان خروجی شبکه، تحلیل مودال به یک مسئلهٔ بهینه‌سازی تبدیل می‌شود.</li>
+            <li><strong>قید نرم‌سازی:</strong> برای جلوگیری از جواب صفر، قید $\int_0^L \phi^2 dx = 1$ به تابع هزینه اضافه می‌شود.</li>
+            <li><strong>روش <span class="lr">Deflation</span>:</strong> با افزودن جمله‌های دافعه، مودهای بالاتر به‌صورت متوالی استخراج می‌شوند.</li>
+        </ol>
+
+        <p><strong>پل به فصل نهم:</strong> در فصل بعد، تحلیل مودال را با داده‌های ارتعاشی ترکیب خواهیم کرد و خواهیم دید که چگونه می‌توان از داده‌های شتاب نویزی برای تخمین هم‌زمان جابه‌جایی، سرعت، و پارامترهای مودال استفاده کرد.</p>
+
+        <!-- ========================================================== -->
+        <!-- تمرین‌های عملی -->
+        <!-- ========================================================== -->
+        <h2 style="margin-top:40px;">تمرین‌های عملی</h2>
+
+        <ol>
+            <li>
+                <strong>تمرین ۱ (تأثیر تعداد نقاط کالوکیشن):</strong> کد را با $N_{col} = 500$ و $N_{col} = 2000$ اجرا کنید و خطای فرکانس‌ها را مقایسه کنید.
+            </li>
+            <li>
+                <strong>تمرین ۲ (تغییر شرایط مرزی):</strong> شرایط مرزی را به دو‌سرساده (<span class="lr">Pinned-Pinned</span>) تغییر دهید.
+            </li>
+            <li>
+                <strong>تمرین ۳ (تیر با مقطع متغیر):</strong> تیر با $I(x) = I_0(1 - 0.5x/L)$ و $A(x) = A_0(1 - 0.5x/L)$ را مدل کنید.
+            </li>
+        </ol>
+
+        <!-- ========================================================== -->
+        <!-- مرجع تکمیلی -->
+        <!-- ========================================================== -->
+        <div class="reference">
+            <strong>مرجع تکمیلی</strong><br>
+            <span class="lr">Le et al. (2022). "Physics-informed neural networks for eigenvalue problems in structural dynamics."</span>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- پانویس -->
+        <!-- ========================================================== -->
+        <div class="footer-line">
+            — ۱۵۰ —
+        </div>
+
+    </div>
+
+</body>
+</html>

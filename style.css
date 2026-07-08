@@ -1,0 +1,425 @@
+/* ════════════════════════════════════════════════════════════
+   استایل مشترک همه‌ی فصل‌ها
+   ════════════════════════════════════════════════════════════ */
+
+/* ---------- تنظیمات پایه ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Vazirmatn', 'IRANSans', 'Tahoma', sans-serif;
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    line-height: 1.8;
+    color: #1e2b3c;
+}
+
+.book-page {
+    max-width: 850px;
+    width: 100%;
+    background: #ffffff;
+    padding: 50px 60px 55px 60px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+}
+
+/* ---------- فاصله‌ی ۱۰۰px از بالای صفحه ---------- */
+.chapter-spacer {
+    height: 100px;
+    display: block;
+}
+
+/* ---------- تیترها ---------- */
+h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0a192f;
+    border-bottom: 3px solid #2c7a7b;
+    padding-bottom: 10px;
+    margin-bottom: 25px;
+}
+
+h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #0a192f;
+    margin-top: 35px;
+    margin-bottom: 15px;
+    border-right: 5px solid #2c7a7b;
+    padding-right: 12px;
+}
+
+h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0a192f;
+    margin-top: 25px;
+    margin-bottom: 10px;
+}
+
+/* ---------- پاراگراف با تورفتگی ---------- */
+p {
+    font-size: 15px;
+    text-align: justify;
+    color: #1e2b3c;
+    margin-bottom: 0;
+    text-indent: 1.5em;
+}
+
+p:first-of-type {
+    text-indent: 0;
+}
+
+/* ---------- جعبه‌ی اهداف ---------- */
+.pinnbox {
+    background: #eaf5f5;
+    border-right: 6px solid #2c7a7b;
+    padding: 18px 25px;
+    margin: 20px 0 30px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.pinnbox strong {
+    font-size: 16px;
+    color: #0f3b3c;
+}
+
+.pinnbox ul,
+.pinnbox ol {
+    padding-right: 25px;
+    margin: 8px 0;
+}
+
+.pinnbox li {
+    font-size: 14.5px;
+    line-height: 2;
+}
+
+/* ---------- فرمول‌ها ---------- */
+.equation {
+    text-align: center;
+    margin: 20px 0;
+    direction: ltr;
+    font-family: 'Noto Serif', 'Times New Roman', serif;
+    font-weight: 600;
+    font-size: 18px;
+    color: #0a192f;
+}
+
+/* ---------- جدول ---------- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+}
+
+table th,
+table td {
+    border: 1px solid #cbd5e0;
+    padding: 10px 12px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+table th {
+    background: #e2edf0;
+    font-weight: 600;
+    color: #0a192f;
+}
+
+table td {
+    background: #fcfcfc;
+}
+
+/* ---------- بلوک کد ---------- */
+.codeblock {
+    direction: ltr;
+    background: #1e2b3c;
+    color: #e2e8f0;
+    padding: 18px 22px 18px 22px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin: 20px 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    position: relative;
+    padding-top: 50px;
+}
+
+.codeblock .comment {
+    color: #7f9f7f;
+}
+.codeblock .keyword {
+    color: #f7c948;
+}
+.codeblock .func {
+    color: #7fc1f7;
+}
+.codeblock .string {
+    color: #b5d99c;
+}
+
+/* دکمه‌ی کپی (با جاوااسکریپت ساخته می‌شود) */
+.copy-btn {
+    float: left;
+    margin-top: -5px;
+    margin-bottom: 10px;
+    background: #2c7a7b;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+    background: #1a5a5b;
+}
+
+/* ---------- لیست‌ها ---------- */
+ul,
+ol {
+    padding-right: 25px;
+    margin: 12px 0 20px 0;
+}
+
+li {
+    font-size: 15px;
+    line-height: 2;
+    color: #1e2b3c;
+}
+
+/* ---------- سرصفحه و پانویس ---------- */
+.header-line {
+    border-bottom: 1px solid #cbd5e0;
+    margin-bottom: 30px;
+    padding-bottom: 8px;
+    font-size: 13px;
+    color: #4a5a6a;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Noto Serif', 'Times New Roman', serif;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.header-left {
+    font-weight: 400;
+}
+.header-right {
+    font-weight: 400;
+}
+
+.footer-line {
+    border-top: 1px solid #cbd5e0;
+    margin-top: 45px;
+    padding-top: 16px;
+    text-align: center;
+    font-size: 14px;
+    color: #4a5a6a;
+    font-family: 'Noto Serif', 'Times New Roman', serif;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+}
+
+/* ---------- ناوبری بین فصل‌ها ---------- */
+.book-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    padding: 18px 0 10px 0;
+    border-top: 2px solid #e2edf0;
+    font-size: 16px;
+    font-family: 'Vazirmatn', sans-serif;
+}
+
+.book-nav .nav-home {
+    color: #2c7a7b;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.book-nav .nav-home:hover {
+    background: #eaf5f5;
+    color: #0a192f;
+}
+
+.book-nav .nav-arrows {
+    display: flex;
+    gap: 20px;
+}
+
+.book-nav a {
+    color: #2c7a7b;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.book-nav a:hover {
+    background: #eaf5f5;
+    color: #0a192f;
+}
+
+.book-nav .nav-disabled {
+    color: #b0b8c0;
+    padding: 6px 14px;
+    cursor: not-allowed;
+}
+
+/* ---------- مرجع ---------- */
+.reference {
+    background: #f0f5f5;
+    padding: 14px 20px;
+    border-radius: 6px;
+    margin-top: 25px;
+    font-size: 14px;
+    color: #1e3a3a;
+}
+
+.reference .lr {
+    direction: ltr;
+    display: inline;
+    font-family: 'Noto Serif', 'Times New Roman', serif;
+    font-weight: 400;
+    font-style: italic;
+}
+
+/* ---------- کلاس lr (واژگان انگلیسی) ---------- */
+.lr {
+    direction: ltr;
+    unicode-bidi: embed;
+    display: inline;
+    font-family: 'Noto Serif', 'Times New Roman', serif;
+    font-weight: 600;
+    font-style: italic;
+    color: #0a192f;
+}
+
+/* ---------- لینک‌ها ---------- */
+a {
+    color: #2c7a7b;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(44, 122, 123, 0.3);
+    transition: all 0.2s ease;
+}
+
+a:hover {
+    color: #1a4a4b;
+    border-bottom-color: #1a4a4b;
+}
+
+/* ---------- واکنش‌گرایی ---------- */
+@media (max-width: 650px) {
+    body {
+        padding: 20px 12px;
+    }
+    .book-page {
+        padding: 25px 20px 30px 20px;
+    }
+    .chapter-spacer {
+        height: 60px;
+    }
+    h1 {
+        font-size: 22px;
+    }
+    h2 {
+        font-size: 19px;
+    }
+    .codeblock {
+        font-size: 12px;
+        padding: 14px;
+        padding-top: 45px;
+    }
+    .header-line {
+        font-size: 11px;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+    table {
+        font-size: 13px;
+    }
+    table th,
+    table td {
+        padding: 8px 10px;
+    }
+    .book-nav {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .book-nav .nav-arrows {
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+/* ---------- چاپ ---------- */
+@media print {
+    body {
+        background: white !important;
+        padding: 0;
+    }
+    .book-page {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 40px 50px 50px 50px !important;
+    }
+    .chapter-spacer {
+        height: 100px !important;
+    }
+    .copy-btn {
+        display: none !important;
+    }
+    .codeblock {
+        background: #f4f4f4 !important;
+        color: #1a1a1a !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        padding-top: 18px !important;
+    }
+    .codeblock .comment {
+        color: #4a6a6a !important;
+    }
+    .codeblock .keyword {
+        color: #8a4a3a !important;
+    }
+    .codeblock .func {
+        color: #1a5a7a !important;
+    }
+    .codeblock .string {
+        color: #4a7a4a !important;
+    }
+    .pinnbox {
+        background: #eaf5f5 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    table th {
+        background: #e2edf0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .book-nav {
+        display: none !important;
+    }
+}
